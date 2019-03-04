@@ -1,0 +1,5 @@
+main: @project.mainClass@
+name: @project.name@
+version: @project.version@
+description: @project.description@
+author: Alan Gomes
