@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Authorize {
+public @interface Audict {
 
-    String value();
+    boolean playerOnly() default true;
 
 }

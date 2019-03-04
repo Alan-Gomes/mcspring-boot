@@ -1,5 +1,6 @@
 package dev.alangomes.mcspring;
 
+import dev.alangomes.mcspring.hook.security.Audict;
 import dev.alangomes.mcspring.hook.security.Authorize;
 import org.bukkit.entity.Player;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,9 @@ public class Greeting {
 
     @Component
     @CommandLine.Command(name = "teste")
+    @Authorize("teste")
     @Scope("prototype")
+    @Audict
     public class TesteCommand implements Runnable {
 
         @Autowired
@@ -25,7 +28,6 @@ public class Greeting {
         private String config;
 
         @Override
-        @Authorize("permissao.teste")
         public void run() {
             player.sendMessage("Ola mundo! " + config);
         }

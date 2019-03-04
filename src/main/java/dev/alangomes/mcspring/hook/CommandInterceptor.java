@@ -30,7 +30,7 @@ class CommandInterceptor implements Listener {
     @EventHandler
     @SneakyThrows
     private void onCommand(PlayerCommandPreprocessEvent event) {
-        serverContext.setPlayer(event.getPlayer());
+        serverContext.setSender(event.getPlayer());
         try {
             List<CommandLine> commands;
             commands = cli.build(context).parse(event.getMessage().substring(1).split(" "));
@@ -50,7 +50,7 @@ class CommandInterceptor implements Listener {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        serverContext.setPlayer(null);
+        serverContext.setSender(null);
     }
 
 }
