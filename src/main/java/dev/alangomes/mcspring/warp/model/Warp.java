@@ -1,9 +1,10 @@
-package dev.alangomes.mcspring.model;
+package dev.alangomes.mcspring.warp.model;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;
+import org.springframework.beans.BeanUtils;
 
 import javax.persistence.*;
 
@@ -24,5 +25,11 @@ public class Warp {
 
     @Column(name = "location", nullable = false)
     private Location location;
+
+    public WarpDTO toDTO() {
+        WarpDTO warp = new WarpDTO();
+        BeanUtils.copyProperties(this, warp);
+        return warp;
+    }
 
 }

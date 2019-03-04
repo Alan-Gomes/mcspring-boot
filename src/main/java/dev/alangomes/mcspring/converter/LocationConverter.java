@@ -1,14 +1,19 @@
 package dev.alangomes.mcspring.converter;
 
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
+import java.io.IOException;
 
 @Converter(autoApply = true)
-public class LocationConverter implements AttributeConverter<Location, String> {
+public class LocationConverter extends TypeAdapter<Location> implements AttributeConverter<Location, String> {
 
     @Override
     public String convertToDatabaseColumn(Location loc) {
@@ -30,4 +35,17 @@ public class LocationConverter implements AttributeConverter<Location, String> {
         return null;
     }
 
+    @Override
+    public void write(JsonWriter writer, Location location) throws IOException {
+        writer.value(convertToDatabaseColumn(location));
+    }
+
+    @Override
+    public Location read(JsonReader reader) throws IOException {
+        if (reader.peek() == JsonToken.NULL) {
+            reader.nextNull();
+            return null;
+        }
+        return convertToEntityAttribute(reader.nextString());
+    }
 }

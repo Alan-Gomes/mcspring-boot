@@ -1,8 +1,8 @@
-package dev.alangomes.mcspring.command;
+package dev.alangomes.mcspring.warp.command;
 
 import dev.alangomes.mcspring.hook.exception.CommandException;
-import dev.alangomes.mcspring.model.Warp;
-import dev.alangomes.mcspring.service.WarpService;
+import dev.alangomes.mcspring.warp.model.WarpDTO;
+import dev.alangomes.mcspring.warp.service.WarpService;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ public class WarpCommands {
 
         @Override
         public void run() {
-            Warp warp = warpService.getWarp(name);
+            WarpDTO warp = warpService.getWarp(name);
             if (warp == null) {
                 throw new CommandException("Warp não encontrado");
             }
@@ -51,7 +51,7 @@ public class WarpCommands {
 
         @Override
         public void run() {
-            Warp warp = warpService.create(name, player.getLocation());
+            WarpDTO warp = warpService.create(name, player.getLocation());
             player.sendMessage(ChatColor.GREEN + "Warp " + warp.getName() + " criado!");
         }
     }
