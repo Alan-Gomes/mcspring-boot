@@ -1,4 +1,4 @@
-package dev.alangomes.mcspring.hook.security;
+package dev.alangomes.mcspring.hook.exception;
 
 public class PlayerNotFoundException extends RuntimeException {
 

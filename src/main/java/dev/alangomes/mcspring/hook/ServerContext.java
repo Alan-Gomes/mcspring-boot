@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Scope("singleton")
 public class ServerContext {
 
-    private AtomicReference<CommandSender> senderRef;
+    private AtomicReference<CommandSender> senderRef = new AtomicReference<>();
 
     void setSender(CommandSender sender) {
         if (!Bukkit.isPrimaryThread()) {

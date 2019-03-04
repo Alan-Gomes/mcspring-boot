@@ -2,6 +2,7 @@ package dev.alangomes.mcspring.hook;
 
 import dev.alangomes.mcspring.picocli.CommandLineDefinition;
 import lombok.SneakyThrows;
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -48,7 +49,7 @@ class CommandInterceptor implements Listener {
             }
         } catch (CommandLine.UnmatchedArgumentException ignored) {
         } catch (Exception ex) {
-            ex.printStackTrace();
+            event.getPlayer().sendMessage(ChatColor.RED + ex.getMessage());
         }
         serverContext.setSender(null);
     }

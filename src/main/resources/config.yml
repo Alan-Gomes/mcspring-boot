@@ -1,2 +1,4 @@
-teste:
-  abc: 'teste'
+database:
+  url: 'jdbc:postgresql://localhost:5432/mcspring'
+  username: 'postgres'
+  password: '12345'
