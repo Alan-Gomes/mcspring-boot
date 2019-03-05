@@ -28,7 +28,7 @@ class UtilAspect {
     private Server server;
 
     @Order(0)
-    @Around("@annotation(dev.alangomes.springspigot.hook.util.Synchronize) || @within(dev.alangomes.springspigot.hook.util.Synchronize)")
+    @Around("@annotation(dev.alangomes.springspigot.util.Synchronize) || @within(dev.alangomes.springspigot.util.Synchronize)")
     public Object synchronizeCall(ProceedingJoinPoint joinPoint) throws Throwable {
         if (Bukkit.isPrimaryThread()) {
             return joinPoint.proceed();

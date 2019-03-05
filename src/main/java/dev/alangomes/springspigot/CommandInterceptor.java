@@ -2,6 +2,8 @@ package dev.alangomes.springspigot;
 
 import dev.alangomes.springspigot.context.ServerContext;
 import dev.alangomes.springspigot.picocli.CommandLineDefinition;
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandException;
 import org.bukkit.command.CommandSender;
@@ -24,12 +26,15 @@ import java.util.concurrent.Callable;
 @Component
 class CommandInterceptor implements Listener {
 
+    @Setter(AccessLevel.PACKAGE)
     @Value("${spigot.messages.command_error}")
     private String commandErrorMessage;
 
+    @Setter(AccessLevel.PACKAGE)
     @Value("${spigot.messages.missing_parameter_error}")
     private String missingParameterErrorMessage;
 
+    @Setter(AccessLevel.PACKAGE)
     @Value("${spigot.messages.parameter_error}")
     private String parameterErrorMessage;
 
@@ -45,7 +50,7 @@ class CommandInterceptor implements Listener {
     private final Logger logger = LoggerFactory.getLogger(CommandInterceptor.class);
 
     @EventHandler
-    private void onPlayerCommand(PlayerCommandPreprocessEvent event) {
+    void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         if (event.isCancelled()) return;
         Player player = event.getPlayer();
         serverContext.setSender(player);
@@ -54,7 +59,7 @@ class CommandInterceptor implements Listener {
     }
 
     @EventHandler
-    private void onServerCommand(ServerCommandEvent event) {
+    void onServerCommand(ServerCommandEvent event) {
         if (event.isCancelled()) return;
         CommandSender sender = event.getSender();
         serverContext.setSender(sender);

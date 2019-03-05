@@ -50,7 +50,7 @@ class SecurityAspect implements Listener {
     private final ExpressionParser parser = new SpelExpressionParser();
 
     @Order(0)
-    @Around("@annotation(dev.alangomes.springspigot.hook.security.Authorize) || @within(dev.alangomes.springspigot.hook.security.Authorize)")
+    @Around("@annotation(dev.alangomes.springspigot.security.Authorize) || @within(dev.alangomes.springspigot.security.Authorize)")
     public Object checkPermission(ProceedingJoinPoint joinPoint) throws Throwable {
         CommandSender sender = serverContext.getSender();
         if (sender == null) {
@@ -67,7 +67,7 @@ class SecurityAspect implements Listener {
     }
 
     @Order(1)
-    @Before("@annotation(dev.alangomes.springspigot.hook.security.Audict) || @within(dev.alangomes.springspigot.hook.security.Audict)")
+    @Before("@annotation(dev.alangomes.springspigot.security.Audict) || @within(dev.alangomes.springspigot.security.Audict)")
     public void audictCall(JoinPoint joinPoint) {
         CommandSender sender = serverContext.getSender();
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();

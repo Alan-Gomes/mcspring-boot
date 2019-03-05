@@ -1,6 +1,7 @@
 package dev.alangomes.springspigot;
 
-import org.bukkit.Bukkit;
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.bukkit.Server;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
@@ -21,6 +22,7 @@ import java.util.Collection;
 class SpringSpigotStartupHook {
 
     @Value("${spigot.plugin}")
+    @Setter(AccessLevel.PACKAGE)
     private String pluginName;
 
     @Autowired
@@ -37,7 +39,7 @@ class SpringSpigotStartupHook {
         initialized = true;
         Plugin plugin = server.getPluginManager().getPlugin(pluginName);
         Collection<Listener> beans = applicationContext.getBeansOfType(Listener.class).values();
-        beans.forEach(bean -> Bukkit.getPluginManager().registerEvents(bean, plugin));
+        beans.forEach(bean -> server.getPluginManager().registerEvents(bean, plugin));
     }
 
     @Bean
