@@ -67,12 +67,12 @@ class SecurityAspect implements Listener {
     }
 
     @Order(1)
-    @Before("@annotation(dev.alangomes.springspigot.security.Audict) || @within(dev.alangomes.springspigot.security.Audict)")
-    public void audictCall(JoinPoint joinPoint) {
+    @Before("@annotation(dev.alangomes.springspigot.security.Audit) || @within(dev.alangomes.springspigot.security.Audit)")
+    public void auditCall(JoinPoint joinPoint) {
         CommandSender sender = serverContext.getSender();
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
-        Audict audict = method.getAnnotation(Audict.class);
-        if (sender != null || !audict.playerOnly()) {
+        Audit audit = method.getAnnotation(Audit.class);
+        if (sender != null || !audit.senderOnly()) {
             String signature = method.getDeclaringClass().getName() + "." + method.getName();
             String arguments = Arrays.stream(joinPoint.getArgs()).map(String::valueOf).collect(Collectors.joining(", "));
             if (sender != null) {

@@ -61,6 +61,14 @@ public class SpringSpigotInitializerTest {
     }
 
     @Test
+    public void shouldNotRegisterPluginConfigurationPropertySourceIfNoConfigAvailable() {
+        initializer = new SpringSpigotInitializer(plugin, false);
+        initializer.initialize(context);
+
+        verify(propertySources, never()).addFirst(any(ConfigurationPropertySource.class));
+    }
+
+    @Test
     public void shouldRegisterHookProperties() {
         initializer.initialize(context);
 

@@ -8,18 +8,29 @@ import org.springframework.core.env.PropertiesPropertySource;
 
 import java.util.Properties;
 
+/**
+ * Initializer that set core properties and adds config yml source
+ */
 public class SpringSpigotInitializer implements
         ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private final JavaPlugin plugin;
+    private final boolean configAvailable;
+
+    public SpringSpigotInitializer(JavaPlugin plugin, boolean configAvailable) {
+        this.plugin = plugin;
+        this.configAvailable = configAvailable;
+    }
 
     public SpringSpigotInitializer(JavaPlugin plugin) {
-        this.plugin = plugin;
+        this(plugin, true);
     }
 
     public void initialize(ConfigurableApplicationContext context) {
         MutablePropertySources propertySources = context.getEnvironment().getPropertySources();
-        propertySources.addFirst(new ConfigurationPropertySource(plugin.getConfig()));
+        if (configAvailable) {
+            propertySources.addFirst(new ConfigurationPropertySource(plugin.getConfig()));
+        }
 
         Properties props = new Properties();
         props.put("spigot.plugin", plugin.getName());

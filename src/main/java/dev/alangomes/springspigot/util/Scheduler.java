@@ -6,6 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+/**
+ * Wrapper around {@link org.bukkit.scheduler.BukkitScheduler BukkitScheduler} to make scheduling easier to write and test.
+ *
+ * @see org.bukkit.scheduler.BukkitScheduler
+ */
 @Component
 @Scope("singleton")
 public class Scheduler {
