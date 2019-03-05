@@ -20,8 +20,6 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class SpringSpigotStartupHookTest {
 
-    private static final String PLUGIN_NAME = "TestPlugin";
-
     @Mock
     private Plugin plugin;
 
@@ -39,9 +37,7 @@ public class SpringSpigotStartupHookTest {
 
     @Before
     public void setup() {
-        startupHook.setPluginName(PLUGIN_NAME);
         when(server.getPluginManager()).thenReturn(pluginManager);
-        when(pluginManager.getPlugin(PLUGIN_NAME)).thenReturn(plugin);
 
         Map<String, Listener> beans = new HashMap<>();
         beans.put("b1", mock(Listener.class));
@@ -53,7 +49,6 @@ public class SpringSpigotStartupHookTest {
     public void shouldRegisterAllListeners() {
         startupHook.onStartup(null);
 
-        verify(pluginManager).getPlugin(PLUGIN_NAME);
         verify(pluginManager, times(2)).registerEvents(notNull(), eq(plugin));
     }
 

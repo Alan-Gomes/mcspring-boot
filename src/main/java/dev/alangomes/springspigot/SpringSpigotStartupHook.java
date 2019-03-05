@@ -1,12 +1,9 @@
 package dev.alangomes.springspigot;
 
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.bukkit.Server;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -21,9 +18,8 @@ import java.util.Collection;
 @Scope("singleton")
 class SpringSpigotStartupHook {
 
-    @Value("${spigot.plugin}")
-    @Setter(AccessLevel.PACKAGE)
-    private String pluginName;
+    @Autowired
+    private Plugin plugin;
 
     @Autowired
     private Server server;
@@ -37,7 +33,6 @@ class SpringSpigotStartupHook {
     void onStartup(ContextRefreshedEvent event) {
         if (initialized) return;
         initialized = true;
-        Plugin plugin = server.getPluginManager().getPlugin(pluginName);
         Collection<Listener> beans = applicationContext.getBeansOfType(Listener.class).values();
         beans.forEach(bean -> server.getPluginManager().registerEvents(bean, plugin));
     }

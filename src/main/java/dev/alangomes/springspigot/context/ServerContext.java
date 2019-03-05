@@ -4,6 +4,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -15,6 +18,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @Scope("singleton")
 public class ServerContext {
+
+    @Value("${spigot.plugin}")
+    private String pluginName;
 
     private final Map<Long, CommandSender> senderRefs = new ConcurrentHashMap<>();
 
@@ -39,15 +45,23 @@ public class ServerContext {
 
     @Bean
     @Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
-    Player playerBean() {
-        CommandSender sender = getSender();
+    Player playerBean(CommandSender sender) {
         return sender instanceof Player ? (Player) sender : null;
     }
 
     @Bean
-    @Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
     Server serverBean() {
         return Bukkit.getServer();
+    }
+
+    @Bean
+    Plugin pluginBean(Server server) {
+        return server.getPluginManager().getPlugin(pluginName);
+    }
+
+    @Bean
+    BukkitScheduler schedulerBean(Server server) {
+        return server.getScheduler();
     }
 
 }
