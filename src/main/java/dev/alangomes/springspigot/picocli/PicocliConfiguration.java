@@ -1,4 +1,4 @@
-package dev.alangomes.mcspring.picocli;
+package dev.alangomes.springspigot.picocli;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.context.ApplicationContext;

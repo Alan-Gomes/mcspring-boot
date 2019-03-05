@@ -1,21 +1,24 @@
-package dev.alangomes.mcspring.hook;
+package dev.alangomes.springspigot;
 
+import org.bukkit.event.Listener;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
+import java.util.Arrays;
+
 public class ScopePostProcessor implements BeanFactoryPostProcessor {
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory factory) throws BeansException {
-        for (String beanName : factory.getBeanDefinitionNames()) {
+        Arrays.stream(factory.getBeanDefinitionNames()).forEach(beanName -> {
             BeanDefinition beanDef = factory.getBeanDefinition(beanName);
-            String explicitScope = beanDef.getScope();
-            if ("".equals(explicitScope)) {
-                beanDef.setScope("prototype");
+            Class<?> beanType = factory.getType(beanName);
+            if (beanType != null && beanType.isAssignableFrom(Listener.class)) {
+                beanDef.setScope("singleton");
             }
-        }
+        });
     }
 
 }

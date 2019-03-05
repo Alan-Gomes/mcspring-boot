@@ -1,10 +1,12 @@
-package dev.alangomes.mcspring.picocli;
+package dev.alangomes.springspigot.picocli;
 
 import lombok.Getter;
 import org.springframework.beans.factory.BeanFactory;
 import picocli.CommandLine;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Set;
 
 @Getter
 public class CommandLineDefinition {
@@ -14,12 +16,12 @@ public class CommandLineDefinition {
 
     private final HashMap<String, Object> subcommands = new HashMap<>();
 
-    public CommandLineDefinition(Object instance) {
+    CommandLineDefinition(Object instance) {
         this.beanName = instance instanceof String ? (String) instance : null;
         this.instance = !(instance instanceof String) ? instance : null;
     }
 
-    public void addSubcommand(String name, Object commandLine) {
+    void addSubcommand(String name, Object commandLine) {
         subcommands.put(name, commandLine);
     }
 
@@ -35,6 +37,10 @@ public class CommandLineDefinition {
             }
         });
         return commandLine;
+    }
+
+    public Set<String> getCommandNames() {
+        return Collections.unmodifiableSet(subcommands.keySet());
     }
 
 }

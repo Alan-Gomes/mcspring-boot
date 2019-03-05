@@ -1,6 +1,5 @@
-package dev.alangomes.mcspring.hook;
+package dev.alangomes.springspigot.context;
 
-import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -10,32 +9,38 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-@Getter
 @Component
 @Scope("singleton")
 public class ServerContext {
 
-    private AtomicReference<CommandSender> senderRef = new AtomicReference<>();
+    private final Map<Long, CommandSender> senderRefs = new ConcurrentHashMap<>();
 
-    void setSender(CommandSender sender) {
-        if (!Bukkit.isPrimaryThread()) {
-            throw new IllegalStateException("Invalid context");
+    public void setSender(CommandSender sender) {
+        long threadId = Thread.currentThread().getId();
+        if (sender == null) {
+            senderRefs.remove(threadId);
+            return;
         }
-        senderRef.set(sender);
+        senderRefs.put(threadId, sender);
+    }
+
+    public CommandSender getSender() {
+        return senderRefs.get(Thread.currentThread().getId());
     }
 
     @Bean
     @Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
     CommandSender senderBean() {
-        return senderRef.get();
+        return getSender();
     }
 
     @Bean
     @Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
     Player playerBean() {
-        CommandSender sender = senderRef.get();
+        CommandSender sender = getSender();
         return sender instanceof Player ? (Player) sender : null;
     }
 

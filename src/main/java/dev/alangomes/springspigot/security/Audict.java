@@ -1,4 +1,4 @@
-package dev.alangomes.mcspring.hook.security;
+package dev.alangomes.springspigot.security;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,4 +1,4 @@
-package dev.alangomes.mcspring.hook;
+package dev.alangomes.springspigot;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.springframework.core.env.PropertySource;
