@@ -11,6 +11,12 @@ import picocli.CommandLine;
 import java.lang.reflect.Method;
 import java.util.*;
 
+/**
+ * @author Thibaud Leprêtre
+ *
+ * Modified to support rebuild and to decouple from spring command line runner.
+ * @see <a href="https://github.com/kakawait/picocli-spring-boot-starter">Spring boot Picocli starter</a>
+ */
 @Configuration
 @Scope("singleton")
 public class PicocliConfiguration {
