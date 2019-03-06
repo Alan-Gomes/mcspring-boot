@@ -118,7 +118,6 @@ This starter provides some useful beans that you can inject and write code easie
 - `Player` / `CommandSender`: the current sender in the context (see [context](#context))
 - `Server`: the server instance
 - `Plugin`: your plugin
-- `Scheduler`: wrapper around the `BukkitScheduler`
 
 ## Retrieving configuration
 
