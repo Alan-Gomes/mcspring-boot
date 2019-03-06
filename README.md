@@ -13,6 +13,7 @@
 - Automatic `Listener` registration
 - Full Spring's dependency injection support
 - Easier Bukkit main thread synchronization via `@Synchronize`
+- Support Spring scheduler on the bukkit main thread (`@Scheduled`)
 
 ## Getting started
 
@@ -37,6 +38,7 @@ public class Application {
 
 Then create the plugin main class using the standard spring initialization, just adding the `SpringSpigotInitializer` initializer.  
 
+<a name="initialization"></a> 
 ```java
 public class ExamplePlugin extends JavaPlugin {
 
@@ -73,21 +75,16 @@ Example of a command:
 
 ```java
 @Component
-public class PluginCommands {
+@CommandLine.Command(name = "hello")
+public class HelloCommand implements Callable<String> {
 
-    @Component
-    @CommandLine.Command(name = "hello")
-    public class HelloCommand implements Callable<String> {
+    @CommandLine.Parameters(index = "0", defaultValue = "world")
+    private String name;
 
-        @CommandLine.Parameters(index = "0", defaultValue = "world")
-        private String name;
-
-        @Override
-        public String call() {
-            return "hello " + world;
-        }
+    @Override
+    public String call() {
+        return "hello " + world;
     }
-
 }
 ```
 
@@ -95,21 +92,16 @@ If you need the sender of the command, you can also inject via `@Autowired`
 
 ```java
 @Component
-public class PluginCommands {
+@CommandLine.Command(name = "heal")
+public class HealCommand implements Runnable {
 
-    @Component
-    @CommandLine.Command(name = "heal")
-    public class HealCommand implements Runnable {
+    @Autowired
+    private Player player;
 
-        @Autowired
-        private Player player;
-
-        @Override
-        public void run() {
-            player.setHealth(20);
-        }
+    @Override
+    public void run() {
+        player.setHealth(20);
     }
-
 }
 ```
 
@@ -129,6 +121,17 @@ Example:
 ```java
 @Value("${command.delay}")
 private Integer commandDelay;
+```
+
+### Disabling support for configuration
+
+Sometimes you want to make a simple plugin without any configuration, if so, the starter will complain about the null config.
+To fix this you should pass a second `boolean` parameter to `SpringSpigotInitializer` during the [initialization](#initialization).
+If the parameter is `false`, it means that your plugin does not need this support and the starter will make no attempt
+to register it. Example:
+
+```java
+application.addInitializers(new SpringSpigotInitializer(this, false));
 ```
 
 ## Securing methods
