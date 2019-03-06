@@ -4,6 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <name>Spring Boot Spigot Starter</name>
+
     <groupId>dev.alangomes</groupId>
     <artifactId>spring-boot-starter-spigot</artifactId>
     <packaging>pom</packaging>
@@ -22,7 +24,7 @@
 
     <licenses>
         <license>
-            <name>Apache License 2.0</name>
+            <name>MIT</name>
             <url>https://github.com/mautini/schemaorg-java/blob/master/LICENSE</url>
             <distribution>repo</distribution>
         </license>
