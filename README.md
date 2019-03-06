@@ -195,3 +195,16 @@ rules or to display in the log.
 
 **Important**: the sender of the context must be always set to `null` at the end of the method, otherwise it can lead to
 security issues.
+
+## Synchronization
+
+In a regular Bukkit plugin, you don't need to care about threads and synchronization. But if you want to run something
+outside the server main thread, like in `BukkitScheduler#runTaskAsynchronously​()`, every access to Bukkit API needs to be
+synchronized to make sure you don't get a `IllegalStateException`.
+
+To make this synchronization easier (without using schedulers and creating runnables), you can simply use the `@Synchronize`
+annotation, which automatically schedules all calls under the hood if they are not in the main thread, passing through otherwise.
+
+**Important things if the call get scheduled**:
+- The return value of the method will **always** be `null`, so make sure your code is null-safe.
+- The method will **not** run immediately, it will on the next server tick, so make sure your code don't rely on that.
