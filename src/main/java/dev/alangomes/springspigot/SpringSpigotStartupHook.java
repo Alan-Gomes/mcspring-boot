@@ -1,15 +1,19 @@
 package dev.alangomes.springspigot;
 
+import dev.alangomes.springspigot.util.SpigotScheduler;
 import org.bukkit.Server;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -35,6 +39,15 @@ class SpringSpigotStartupHook {
         initialized = true;
         Collection<Listener> beans = applicationContext.getBeansOfType(Listener.class).values();
         beans.forEach(bean -> server.getPluginManager().registerEvents(bean, plugin));
+    }
+
+    @Bean
+    @Scope("singleton")
+    public TaskScheduler taskScheduler(Plugin plugin, BukkitScheduler scheduler, @Value("${spigot.scheduler.poolSize:1}") int poolSize) {
+        SpigotScheduler taskScheduler = new SpigotScheduler(plugin, scheduler);
+        taskScheduler.setPoolSize(poolSize);
+        taskScheduler.initialize();
+        return taskScheduler;
     }
 
     @Bean
