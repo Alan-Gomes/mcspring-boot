@@ -4,6 +4,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.bukkit.Server;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,10 @@ class UtilAspect {
     private Logger logger = LoggerFactory.getLogger(UtilAspect.class);
 
     @Autowired
-    private Scheduler scheduler;
+    private BukkitScheduler scheduler;
+
+    @Autowired
+    private Plugin plugin;
 
     @Autowired
     private Server server;
@@ -30,7 +35,7 @@ class UtilAspect {
         if (server.isPrimaryThread()) {
             return joinPoint.proceed();
         }
-        scheduler.scheduleSyncDelayedTask(() -> {
+        scheduler.scheduleSyncDelayedTask(plugin, () -> {
             try {
                 joinPoint.proceed();
             } catch (Throwable throwable) {
