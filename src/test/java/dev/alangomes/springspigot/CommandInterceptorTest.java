@@ -23,8 +23,8 @@ import java.util.concurrent.Callable;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CommandInterceptorTest {
@@ -68,6 +68,10 @@ public class CommandInterceptorTest {
         when(argument.paramLabel()).thenReturn("<parameter>");
 
         event = new PlayerCommandPreprocessEvent(player, "/say hello", Collections.emptySet());
+        doAnswer(i -> {
+            ((Runnable) i.getArguments()[1]).run();
+            return null;
+        }).when(serverContext).runWithSender(any(), any());
     }
 
     @Test
@@ -75,8 +79,6 @@ public class CommandInterceptorTest {
         commandInterceptor.onPlayerCommand(event);
 
         assertTrue(event.isCancelled());
-        verify(serverContext).setSender(player);
-        verify(serverContext).setSender(null);
         verify(commandLine).parse("say", "hello");
         verify(commandRunnable).run();
     }
@@ -87,8 +89,6 @@ public class CommandInterceptorTest {
         commandInterceptor.onServerCommand(serverCommandEvent);
 
         assertTrue(serverCommandEvent.isCancelled());
-        verify(serverContext).setSender(player);
-        verify(serverContext).setSender(null);
         verify(commandLine).parse("say", "hello");
         verify(commandRunnable).run();
     }
@@ -100,8 +100,6 @@ public class CommandInterceptorTest {
 
         assertFalse(event.isCancelled());
         verify(commandLine).parse("say", "hello");
-        verify(serverContext).setSender(player);
-        verify(serverContext).setSender(null);
     }
 
     @Test
@@ -112,8 +110,6 @@ public class CommandInterceptorTest {
 
         assertFalse(event.isCancelled());
         verify(commandLine).parse("say", "hello");
-        verify(serverContext).setSender(player);
-        verify(serverContext).setSender(null);
     }
 
     @Test
@@ -124,8 +120,6 @@ public class CommandInterceptorTest {
         commandInterceptor.onPlayerCommand(event);
 
         assertTrue(event.isCancelled());
-        verify(serverContext).setSender(player);
-        verify(serverContext).setSender(null);
         verify(commandLine).parse("say", "hello");
         verify(commandCallable).call();
         verify(player).sendMessage("hello world");
@@ -139,8 +133,6 @@ public class CommandInterceptorTest {
         commandInterceptor.onPlayerCommand(event);
 
         assertTrue(event.isCancelled());
-        verify(serverContext).setSender(player);
-        verify(serverContext).setSender(null);
         verify(commandLine).parse("say", "hello");
         verify(commandCallable).call();
         verify(player).sendMessage("hello");
@@ -155,8 +147,6 @@ public class CommandInterceptorTest {
         commandInterceptor.onPlayerCommand(event);
 
         assertTrue(event.isCancelled());
-        verify(serverContext).setSender(player);
-        verify(serverContext).setSender(null);
         verify(commandLine).parse("say", "hello");
         verify(player).sendMessage(ChatColor.GREEN + "missing parameter: <parameter>");
     }
@@ -169,8 +159,6 @@ public class CommandInterceptorTest {
         commandInterceptor.onPlayerCommand(event);
 
         assertTrue(event.isCancelled());
-        verify(serverContext).setSender(player);
-        verify(serverContext).setSender(null);
         verify(commandLine).parse("say", "hello");
         verify(player).sendMessage(ChatColor.AQUA + "invalid parameter: <parameter>");
     }
@@ -183,8 +171,6 @@ public class CommandInterceptorTest {
         commandInterceptor.onPlayerCommand(event);
 
         assertTrue(event.isCancelled());
-        verify(serverContext).setSender(player);
-        verify(serverContext).setSender(null);
         verify(commandLine).parse("say", "hello");
         verify(player).sendMessage(ChatColor.RED + "generic error");
     }
@@ -197,8 +183,6 @@ public class CommandInterceptorTest {
         commandInterceptor.onPlayerCommand(event);
 
         assertTrue(event.isCancelled());
-        verify(serverContext).setSender(player);
-        verify(serverContext).setSender(null);
         verify(commandLine).parse("say", "hello");
         verify(player).sendMessage(ChatColor.RED + "unexpected error");
     }

@@ -56,18 +56,20 @@ class CommandInterceptor implements Listener {
     void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         if (event.isCancelled()) return;
         Player player = event.getPlayer();
-        serverContext.setSender(player);
-        event.setCancelled(runCommand(player, event.getMessage().substring(1)));
-        serverContext.setSender(null);
+        serverContext.runWithSender(player, () -> {
+            boolean executed = runCommand(player, event.getMessage().substring(1));
+            event.setCancelled(executed);
+        });
     }
 
     @EventHandler
     void onServerCommand(ServerCommandEvent event) {
         if (event.isCancelled()) return;
         CommandSender sender = event.getSender();
-        serverContext.setSender(sender);
-        event.setCancelled(runCommand(sender, event.getCommand()));
-        serverContext.setSender(null);
+        serverContext.runWithSender(sender, () -> {
+            boolean executed = runCommand(sender, event.getCommand());
+            event.setCancelled(executed);
+        });
     }
 
     private boolean runCommand(CommandSender sender, String commandText) {

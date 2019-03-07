@@ -1,6 +1,5 @@
 package dev.alangomes.springspigot.context;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -51,6 +50,23 @@ public class ServerContext {
         return senderRefs.get(Thread.currentThread().getId());
     }
 
+    /**
+     * Run a {@param runnable} with a specific {@param sender} in the context
+     * This is just a utility method that ensure the context is cleaned after the method execution
+     *
+     * @param sender The sender to be set at the context
+     * @param runnable The code to be executed
+     */
+    public void runWithSender(CommandSender sender, Runnable runnable) {
+        CommandSender oldSender = getSender();
+        setSender(sender);
+        try {
+            runnable.run();
+        } finally {
+            setSender(oldSender);
+        }
+    }
+
     @Bean
     @Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
     CommandSender senderBean() {
@@ -64,8 +80,8 @@ public class ServerContext {
     }
 
     @Bean
-    Server serverBean() {
-        return Bukkit.getServer();
+    Server serverBean(Plugin plugin) {
+        return plugin.getServer();
     }
 
     @Bean

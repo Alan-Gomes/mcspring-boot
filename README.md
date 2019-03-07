@@ -198,6 +198,23 @@ rules or to display in the log.
 **Important**: the sender of the context must be always set to `null` at the end of the method, otherwise it can lead to
 security issues.
 
+If you don't want to write `try`'s and `catch`es all over your code, the `ServerContext` also offers a utility method to
+automatically do all this job.
+
+```java
+@EventHandler
+void onJoin(PlayerJoinEvent event) {
+    serverContext.runWithSender(e.getPlayer(), () -> {
+        myService.doSomething();
+    });
+    // or, if you are already familiar with Java 8 method references
+    serverContext.runWithSender(e.getPlayer(), myService::doSomething);
+}
+```
+
+Also, if you need to work with other threads, is highly recommended to make all needed beans `@Stateless`, to ensure
+they do not share the same state, causing concurrency problems.
+
 ## Synchronization
 
 In a regular Bukkit plugin, you don't need to care about threads and synchronization. But if you want to run something
