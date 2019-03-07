@@ -4,6 +4,7 @@ import dev.alangomes.springspigot.context.ServerContext;
 import dev.alangomes.springspigot.picocli.CommandLineDefinition;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandException;
 import org.bukkit.command.CommandSender;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 @Component
+@ConditionalOnClass(Bukkit.class)
 class CommandInterceptor implements Listener {
 
     @Setter(AccessLevel.PACKAGE)

@@ -7,9 +7,9 @@
     <name>Spring Boot Spigot Starter</name>
 
     <groupId>dev.alangomes</groupId>
-    <artifactId>spring-boot-starter-spigot</artifactId>
+    <artifactId>spigot-spring-boot-starter</artifactId>
     <packaging>jar</packaging>
-    <version>0.2.1</version>
+    <version>0.3.0</version>
     <description>Spring support for spigot plugins</description>
     <url>https://github.com/Alan-Gomes/mcspring-boot</url>
 

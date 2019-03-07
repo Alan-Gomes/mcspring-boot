@@ -18,7 +18,7 @@ import java.util.Map;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SpringSpigotStartupHookTest {
+public class SpringSpigotAutoConfigurationTest {
 
     @Mock
     private Plugin plugin;
@@ -33,7 +33,7 @@ public class SpringSpigotStartupHookTest {
     private PluginManager pluginManager;
 
     @InjectMocks
-    private SpringSpigotStartupHook startupHook;
+    private SpringSpigotAutoConfiguration startupHook;
 
     @Before
     public void setup() {
