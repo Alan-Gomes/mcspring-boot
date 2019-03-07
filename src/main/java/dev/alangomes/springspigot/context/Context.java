@@ -8,7 +8,6 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -16,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @Scope("singleton")
-public class ServerContext {
+public class Context {
 
     @Value("${spigot.plugin}")
     private String pluginName;
@@ -38,6 +37,16 @@ public class ServerContext {
             return;
         }
         senderRefs.put(threadId, sender);
+    }
+
+    /**
+     * Convenience method to return the current sender as a {@link org.bukkit.entity.Player}
+     *
+     * @return the current {@link org.bukkit.entity.Player} in the context if present, {@code null} otherwise
+     */
+    public Player getPlayer() {
+        CommandSender sender = getSender();
+        return sender instanceof Player ? (Player) sender : null;
     }
 
     /**
@@ -65,18 +74,6 @@ public class ServerContext {
         } finally {
             setSender(oldSender);
         }
-    }
-
-    @Bean
-    @Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
-    CommandSender senderBean() {
-        return getSender();
-    }
-
-    @Bean
-    @Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
-    Player playerBean(CommandSender sender) {
-        return sender instanceof Player ? (Player) sender : null;
     }
 
     @Bean

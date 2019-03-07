@@ -1,6 +1,6 @@
 package dev.alangomes.springspigot;
 
-import dev.alangomes.springspigot.context.ServerContext;
+import dev.alangomes.springspigot.context.Context;
 import dev.alangomes.springspigot.picocli.CommandLineDefinition;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandException;
@@ -23,20 +23,19 @@ import java.util.concurrent.Callable;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CommandInterceptorTest {
 
     @Mock
-    private ApplicationContext context;
+    private ApplicationContext applicationContext;
 
     @Mock
     private CommandLineDefinition commandLineDefinition;
 
     @Mock
-    private ServerContext serverContext;
+    private Context context;
 
     @Mock
     private Runnable commandRunnable;
@@ -60,7 +59,7 @@ public class CommandInterceptorTest {
 
     @Before
     public void setup() {
-        when(commandLineDefinition.build(context)).thenReturn(commandLine);
+        when(commandLineDefinition.build(applicationContext)).thenReturn(commandLine);
         when(commandLine.parse(any())).thenReturn(Collections.singletonList(command));
 
         when(command.getCommand()).thenReturn(commandRunnable);
@@ -71,7 +70,7 @@ public class CommandInterceptorTest {
         doAnswer(i -> {
             ((Runnable) i.getArguments()[1]).run();
             return null;
-        }).when(serverContext).runWithSender(any(), any());
+        }).when(context).runWithSender(any(), any());
     }
 
     @Test

@@ -1,6 +1,6 @@
 # Spring Boot Spigot Starter
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.alangomes/spigot-spring-boot-starter.svg)](https://search.maven.org/#artifactdetails%7Cdev.alangomes%7Cspigot-spring-boot-starter%7C0.3.1%7Cjar)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.alangomes/spigot-spring-boot-starter.svg)](https://search.maven.org/#artifactdetails%7Cdev.alangomes%7Cspigot-spring-boot-starter%7C0.4.0%7Cjar)
 [![License](https://img.shields.io/github/license/Alan-Gomes/mcspring-boot.svg?style=popout)](https://github.com/Alan-Gomes/mcspring-boot/blob/master/LICENSE)
 
 > A Spring boot starter for Bukkit/Spigot/PaperSpigot plugins
@@ -23,7 +23,7 @@ Add the Spring boot starter to your project
 <dependency>
   <groupId>dev.alangomes</groupId>
   <artifactId>spigot-spring-boot-starter</artifactId>
-  <version>0.3.1</version>
+  <version>0.4.0</version>
 </dependency>
 ```
 
@@ -88,7 +88,7 @@ public class HelloCommand implements Callable<String> {
 }
 ```
 
-If you need the sender of the command, you can also inject via `@Autowired`
+If you need the sender of the command, you can also retrieve it in the `Context`:
 
 ```java
 @Component
@@ -96,20 +96,17 @@ If you need the sender of the command, you can also inject via `@Autowired`
 public class HealCommand implements Runnable {
 
     @Autowired
-    private Player player;
+    private Context context;
 
     @Override
     public void run() {
+        Player player = context.getPlayer();
         player.setHealth(20);
     }
 }
 ```
 
-This starter provides some useful beans that you can inject and write code easier:
-
-- `Player` / `CommandSender`: the current sender in the context (see [context](#context))
-- `Server`: the server instance
-- `Plugin`: your plugin
+In addition, you can also inject the `Plugin` and `Server` instances via `@Autowired`
 
 ## Retrieving configuration
 
@@ -211,9 +208,6 @@ void onJoin(PlayerJoinEvent event) {
     serverContext.runWithSender(e.getPlayer(), myService::doSomething);
 }
 ```
-
-Also, if you need to work with other threads, is highly recommended to make all needed beans `@Stateless`, to ensure
-they do not share the same state, causing concurrency problems.
 
 ## Synchronization
 

@@ -1,6 +1,6 @@
 package dev.alangomes.springspigot;
 
-import dev.alangomes.springspigot.context.ServerContext;
+import dev.alangomes.springspigot.context.Context;
 import dev.alangomes.springspigot.picocli.CommandLineDefinition;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -42,13 +42,13 @@ class CommandInterceptor implements Listener {
     private String parameterErrorMessage;
 
     @Autowired
-    private ApplicationContext context;
+    private ApplicationContext applicationContext;
 
     @Autowired
     private CommandLineDefinition cli;
 
     @Autowired
-    private ServerContext serverContext;
+    private Context context;
 
     private final Logger logger = LoggerFactory.getLogger(CommandInterceptor.class);
 
@@ -56,7 +56,7 @@ class CommandInterceptor implements Listener {
     void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         if (event.isCancelled()) return;
         Player player = event.getPlayer();
-        serverContext.runWithSender(player, () -> {
+        context.runWithSender(player, () -> {
             boolean executed = runCommand(player, event.getMessage().substring(1));
             event.setCancelled(executed);
         });
@@ -66,7 +66,7 @@ class CommandInterceptor implements Listener {
     void onServerCommand(ServerCommandEvent event) {
         if (event.isCancelled()) return;
         CommandSender sender = event.getSender();
-        serverContext.runWithSender(sender, () -> {
+        context.runWithSender(sender, () -> {
             boolean executed = runCommand(sender, event.getCommand());
             event.setCancelled(executed);
         });
@@ -74,7 +74,7 @@ class CommandInterceptor implements Listener {
 
     private boolean runCommand(CommandSender sender, String commandText) {
         try {
-            List<CommandLine> commands = cli.build(context).parse(commandText.split(" "));
+            List<CommandLine> commands = cli.build(applicationContext).parse(commandText.split(" "));
             for (CommandLine commandLine : commands) {
                 Object command = commandLine.getCommand();
 

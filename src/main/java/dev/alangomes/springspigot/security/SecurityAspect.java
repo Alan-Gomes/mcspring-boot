@@ -1,6 +1,6 @@
 package dev.alangomes.springspigot.security;
 
-import dev.alangomes.springspigot.context.ServerContext;
+import dev.alangomes.springspigot.context.Context;
 import dev.alangomes.springspigot.exception.PermissionDeniedException;
 import dev.alangomes.springspigot.exception.PlayerNotFoundException;
 import org.aspectj.lang.JoinPoint;
@@ -39,7 +39,7 @@ import static jdk.nashorn.internal.runtime.JSType.toBoolean;
 class SecurityAspect implements Listener {
 
     @Autowired
-    private ServerContext serverContext;
+    private Context context;
 
     private Logger logger = LoggerFactory.getLogger(SecurityAspect.class);
 
@@ -52,7 +52,7 @@ class SecurityAspect implements Listener {
     @Order(0)
     @Around("@annotation(dev.alangomes.springspigot.security.Authorize) || @within(dev.alangomes.springspigot.security.Authorize)")
     public Object checkPermission(ProceedingJoinPoint joinPoint) throws Throwable {
-        CommandSender sender = serverContext.getSender();
+        CommandSender sender = context.getSender();
         if (sender == null) {
             throw new PlayerNotFoundException();
         }
@@ -69,7 +69,7 @@ class SecurityAspect implements Listener {
     @Order(1)
     @Before("@annotation(dev.alangomes.springspigot.security.Audit) || @within(dev.alangomes.springspigot.security.Audit)")
     public void auditCall(JoinPoint joinPoint) {
-        CommandSender sender = serverContext.getSender();
+        CommandSender sender = context.getSender();
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         Audit audit = method.getAnnotation(Audit.class);
         if (sender != null || !audit.senderOnly()) {
