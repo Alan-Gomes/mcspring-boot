@@ -8,8 +8,8 @@
 
     <groupId>dev.alangomes</groupId>
     <artifactId>spring-boot-starter-spigot</artifactId>
-    <packaging>pom</packaging>
-    <version>0.2.0</version>
+    <packaging>jar</packaging>
+    <version>0.2.1</version>
     <description>Spring support for spigot plugins</description>
     <url>https://github.com/Alan-Gomes/mcspring-boot</url>
 
