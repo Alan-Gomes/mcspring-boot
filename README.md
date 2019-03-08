@@ -45,7 +45,6 @@ public class ExamplePlugin extends JavaPlugin {
     private ConfigurableApplicationContext context;
 
     @Override
-    @SneakyThrows
     public void onEnable() {
         saveDefaultConfig();
         ResourceLoader loader = new DefaultResourceLoader(getClassLoader());
