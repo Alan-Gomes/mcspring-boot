@@ -45,7 +45,6 @@ public class ExamplePlugin extends JavaPlugin {
     private ConfigurableApplicationContext context;
 
     @Override
-    @SneakyThrows
     public void onEnable() {
         saveDefaultConfig();
         ResourceLoader loader = new DefaultResourceLoader(getClassLoader());
@@ -83,7 +82,7 @@ public class HelloCommand implements Callable<String> {
 
     @Override
     public String call() {
-        return "hello " + world;
+        return "hello " + name;
     }
 }
 ```
