@@ -83,7 +83,7 @@ public class HelloCommand implements Callable<String> {
 
     @Override
     public String call() {
-        return "hello " + world;
+        return "hello " + name;
     }
 }
 ```
