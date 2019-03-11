@@ -23,7 +23,7 @@ Add the Spring boot starter to your project
 <dependency>
   <groupId>dev.alangomes</groupId>
   <artifactId>spigot-spring-boot-starter</artifactId>
-  <version>0.4.0</version>
+  <version>0.5.0</version>
 </dependency>
 ```
 
@@ -109,15 +109,17 @@ In addition, you can also inject the `Plugin` and `Server` instances via `@Autow
 
 ## Retrieving configuration
 
-Is really easy to retrieve configuration properties, you can use Spring's `@Value` annotation, it will automatically
-lookup your `config.yml` find the value, otherwise will fallback to the framework's properties.
+Is really easy to retrieve configuration properties, you can use the `@DynamicValue` annotation, it will automatically
+lookup your `config.yml` to find the value, otherwise will fallback to the framework's properties.
 
 Example:
 
 ```java
-@Value("${command.delay}")
-private Integer commandDelay;
+@DynamicValue("${command.delay}")
+private Instance<Integer> commandDelay;
 ```
+
+You can also use Spring built-in `@Value` annotation, which works the same way, but doesn't support configuration reloading. 
 
 ### Disabling support for configuration
 

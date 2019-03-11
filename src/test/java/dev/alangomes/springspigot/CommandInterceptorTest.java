@@ -1,5 +1,6 @@
 package dev.alangomes.springspigot;
 
+import dev.alangomes.springspigot.configuration.Instance;
 import dev.alangomes.springspigot.context.Context;
 import dev.alangomes.springspigot.picocli.CommandLineDefinition;
 import org.bukkit.ChatColor;
@@ -59,6 +60,10 @@ public class CommandInterceptorTest {
 
     @Before
     public void setup() {
+        Instance<Boolean> cacheEnabled = mock(Instance.class);
+        when(cacheEnabled.get()).thenReturn(false);
+        commandInterceptor.setCacheEnabled(cacheEnabled);
+
         when(commandLineDefinition.build(applicationContext)).thenReturn(commandLine);
         when(commandLine.parse(any())).thenReturn(Collections.singletonList(command));
 
@@ -78,6 +83,7 @@ public class CommandInterceptorTest {
         commandInterceptor.onPlayerCommand(event);
 
         assertTrue(event.isCancelled());
+        verify(commandLineDefinition).build(applicationContext);
         verify(commandLine).parse("say", "hello");
         verify(commandRunnable).run();
     }
@@ -140,7 +146,9 @@ public class CommandInterceptorTest {
 
     @Test
     public void shouldSendMissingParameterError() {
-        commandInterceptor.setMissingParameterErrorMessage("&amissing parameter: %s");
+        Instance<String> instance = mock(Instance.class);
+        when(instance.get()).thenReturn("&amissing parameter: %s");
+        commandInterceptor.setMissingParameterErrorMessage(instance);
         when(commandLine.parse(any())).thenThrow(new CommandLine.MissingParameterException(commandLine, argument, ""));
 
         commandInterceptor.onPlayerCommand(event);
@@ -152,7 +160,9 @@ public class CommandInterceptorTest {
 
     @Test
     public void shouldSendInvalidParameterError() {
-        commandInterceptor.setParameterErrorMessage("&binvalid parameter: %s");
+        Instance<String> instance = mock(Instance.class);
+        when(instance.get()).thenReturn("&binvalid parameter: %s");
+        commandInterceptor.setParameterErrorMessage(instance);
         when(commandLine.parse(any())).thenThrow(new CommandLine.ParameterException(commandLine, "", argument, ""));
 
         commandInterceptor.onPlayerCommand(event);
@@ -164,7 +174,6 @@ public class CommandInterceptorTest {
 
     @Test
     public void shouldSendCommandErrorMessage() {
-        commandInterceptor.setParameterErrorMessage("invalid parameter: %s");
         when(commandLine.parse(any())).thenThrow(new CommandException("generic error"));
 
         commandInterceptor.onPlayerCommand(event);
@@ -176,7 +185,9 @@ public class CommandInterceptorTest {
 
     @Test
     public void shouldSendGenericErrorMessage() {
-        commandInterceptor.setCommandErrorMessage("&cunexpected error");
+        Instance<String> instance = mock(Instance.class);
+        when(instance.get()).thenReturn("&cunexpected error");
+        commandInterceptor.setCommandErrorMessage(instance);
         when(commandLine.parse(any())).thenThrow(new RuntimeException("ignored message"));
 
         commandInterceptor.onPlayerCommand(event);
@@ -184,6 +195,16 @@ public class CommandInterceptorTest {
         assertTrue(event.isCancelled());
         verify(commandLine).parse("say", "hello");
         verify(player).sendMessage(ChatColor.RED + "unexpected error");
+    }
+
+    @Test
+    public void shouldStoreCommandLineCache() {
+        when(commandInterceptor.getCacheEnabled().get()).thenReturn(true);
+
+        commandInterceptor.onPlayerCommand(event);
+        commandInterceptor.onPlayerCommand(event);
+
+        verify(commandLineDefinition).build(applicationContext);
     }
 
 }

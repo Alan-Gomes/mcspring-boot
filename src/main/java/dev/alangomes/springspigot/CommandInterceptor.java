@@ -1,8 +1,11 @@
 package dev.alangomes.springspigot;
 
+import dev.alangomes.springspigot.configuration.DynamicValue;
+import dev.alangomes.springspigot.configuration.Instance;
 import dev.alangomes.springspigot.context.Context;
 import dev.alangomes.springspigot.picocli.CommandLineDefinition;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -16,7 +19,6 @@ import org.bukkit.event.server.ServerCommandEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -25,21 +27,28 @@ import picocli.CommandLine;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import static org.apache.commons.lang.BooleanUtils.toBoolean;
+
 @Component
 @ConditionalOnClass(Bukkit.class)
 class CommandInterceptor implements Listener {
 
     @Setter(AccessLevel.PACKAGE)
-    @Value("${spigot.messages.command_error}")
-    private String commandErrorMessage;
+    @DynamicValue("${spigot.messages.command_error}")
+    private Instance<String> commandErrorMessage;
 
     @Setter(AccessLevel.PACKAGE)
-    @Value("${spigot.messages.missing_parameter_error}")
-    private String missingParameterErrorMessage;
+    @DynamicValue("${spigot.messages.missing_parameter_error}")
+    private Instance<String> missingParameterErrorMessage;
 
     @Setter(AccessLevel.PACKAGE)
-    @Value("${spigot.messages.parameter_error}")
-    private String parameterErrorMessage;
+    @DynamicValue("${spigot.messages.parameter_error}")
+    private Instance<String> parameterErrorMessage;
+
+    @Setter(AccessLevel.PACKAGE)
+    @Getter(AccessLevel.PACKAGE)
+    @DynamicValue("${spigot.commands.enable_cache:true}")
+    private Instance<Boolean> cacheEnabled;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -49,6 +58,8 @@ class CommandInterceptor implements Listener {
 
     @Autowired
     private Context context;
+
+    private CommandLine commandLineCache;
 
     private final Logger logger = LoggerFactory.getLogger(CommandInterceptor.class);
 
@@ -74,7 +85,10 @@ class CommandInterceptor implements Listener {
 
     private boolean runCommand(CommandSender sender, String commandText) {
         try {
-            List<CommandLine> commands = cli.build(applicationContext).parse(commandText.split(" "));
+            if (!toBoolean(cacheEnabled.get()) || commandLineCache == null) {
+                commandLineCache = cli.build(applicationContext);
+            }
+            List<CommandLine> commands = commandLineCache.parse(commandText.split(" "));
             for (CommandLine commandLine : commands) {
                 Object command = commandLine.getCommand();
 
@@ -88,11 +102,11 @@ class CommandInterceptor implements Listener {
             return !commands.isEmpty();
         } catch (CommandLine.UnmatchedArgumentException ignored) {
         } catch (CommandLine.MissingParameterException ex) {
-            String message = String.format(missingParameterErrorMessage, ex.getMissing().get(0).paramLabel());
+            String message = String.format(missingParameterErrorMessage.get(), ex.getMissing().get(0).paramLabel());
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
             return true;
         } catch (CommandLine.ParameterException ex) {
-            String message = String.format(parameterErrorMessage, ex.getArgSpec().paramLabel());
+            String message = String.format(parameterErrorMessage.get(), ex.getArgSpec().paramLabel());
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
             return true;
         } catch (CommandException ex) {
@@ -100,7 +114,7 @@ class CommandInterceptor implements Listener {
             return true;
         } catch (Exception ex) {
             logger.error("Unexpected exception while running /" + commandText, ex);
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', commandErrorMessage));
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', commandErrorMessage.get()));
             return true;
         }
         return false;

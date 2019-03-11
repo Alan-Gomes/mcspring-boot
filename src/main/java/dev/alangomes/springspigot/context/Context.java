@@ -1,5 +1,6 @@
 package dev.alangomes.springspigot.context;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -77,8 +78,8 @@ public class Context {
     }
 
     @Bean
-    Server serverBean(Plugin plugin) {
-        return plugin.getServer();
+    Server serverBean() {
+        return Bukkit.getServer();
     }
 
     @Bean
