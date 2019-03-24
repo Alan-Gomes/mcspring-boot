@@ -1,24 +1,22 @@
 package dev.alangomes.springspigot.configuration;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.env.Environment;
 
+@AllArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class Instance<T> {
 
-    private final Environment environment;
+    Environment environment;
 
-    private final String expression;
+    String expression;
 
-    private final ConversionService conversionService;
+    ConversionService conversionService;
 
-    private final Class<T> type;
-
-    Instance(Environment environment, String expression, ConversionService conversionService, Class<T> type) {
-        this.environment = environment;
-        this.expression = expression;
-        this.conversionService = conversionService;
-        this.type = type;
-    }
+    Class<T> type;
 
     public T get() {
         return conversionService.convert(environment.resolvePlaceholders(expression), type);

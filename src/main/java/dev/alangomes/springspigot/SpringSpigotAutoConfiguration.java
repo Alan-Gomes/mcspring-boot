@@ -1,6 +1,7 @@
 package dev.alangomes.springspigot;
 
-import dev.alangomes.springspigot.util.SpigotScheduler;
+import dev.alangomes.springspigot.util.scheduler.SpigotScheduler;
+import lombok.val;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.event.Listener;
@@ -19,9 +20,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.stereotype.Component;
-
-import java.util.Collection;
 
 @Configuration
 @ComponentScan("dev.alangomes.springspigot")
@@ -43,17 +41,32 @@ class SpringSpigotAutoConfiguration {
     void onStartup(ContextRefreshedEvent event) {
         if (initialized) return;
         initialized = true;
-        Collection<Listener> beans = applicationContext.getBeansOfType(Listener.class).values();
+        val beans = applicationContext.getBeansOfType(Listener.class).values();
         beans.forEach(bean -> server.getPluginManager().registerEvents(bean, plugin));
     }
 
     @Bean
     @Scope("singleton")
     public TaskScheduler taskScheduler(Plugin plugin, BukkitScheduler scheduler, @Value("${spigot.scheduler.poolSize:1}") int poolSize) {
-        SpigotScheduler taskScheduler = new SpigotScheduler(plugin, scheduler);
+        val taskScheduler = new SpigotScheduler(plugin, scheduler);
         taskScheduler.setPoolSize(poolSize);
         taskScheduler.initialize();
         return taskScheduler;
+    }
+
+    @Bean
+    Server serverBean(Plugin plugin) {
+        return plugin.getServer();
+    }
+
+    @Bean
+    Plugin pluginBean(@Value("${spigot.plugin}") String pluginName) {
+        return Bukkit.getPluginManager().getPlugin(pluginName);
+    }
+
+    @Bean
+    BukkitScheduler schedulerBean(Server server) {
+        return server.getScheduler();
     }
 
     @Bean

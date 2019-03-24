@@ -1,38 +1,34 @@
 package dev.alangomes.springspigot.context;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Server;
+import dev.alangomes.springspigot.util.ServerUtil;
+import lombok.val;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitScheduler;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Component
 @Scope("singleton")
 public class Context {
 
-    @Value("${spigot.plugin}")
-    private String pluginName;
+    @Autowired
+    private ServerUtil serverUtil;
 
     private final Map<Long, CommandSender> senderRefs = new ConcurrentHashMap<>();
 
     /**
      * Set the current sender in the thread context.
-     * This is necessary to get the sender via dependency injection.
-     *
-     * Make sure the sender is set to null in the same context at the end.
      *
      * @param sender The new {@link org.bukkit.command.CommandSender} of the context.
      */
-    public void setSender(CommandSender sender) {
-        long threadId = Thread.currentThread().getId();
+    void setSender(CommandSender sender) {
+        val threadId = Thread.currentThread().getId();
         if (sender == null) {
             senderRefs.remove(threadId);
             return;
@@ -46,13 +42,12 @@ public class Context {
      * @return the current {@link org.bukkit.entity.Player} in the context if present, {@code null} otherwise
      */
     public Player getPlayer() {
-        CommandSender sender = getSender();
+        val sender = getSender();
         return sender instanceof Player ? (Player) sender : null;
     }
 
     /**
-     * Utility method to retrieve the current {@param sender} of the context.
-     * It is recommended to get this value via dependency injection.
+     * Retrieve the current {@param sender} of the context.
      *
      * @return The current sender of the context.
      */
@@ -61,35 +56,57 @@ public class Context {
     }
 
     /**
-     * Run a {@param runnable} with a specific {@param sender} in the context
-     * This is just a utility method that ensure the context is cleaned after the method execution
+     * Get the most unique id available for the player in the context.
+     * see {@link dev.alangomes.springspigot.util.ServerUtil#getSenderId}
      *
-     * @param sender The sender to be set at the context
-     * @param runnable The code to be executed
+     * @return the sender id
      */
-    public void runWithSender(CommandSender sender, Runnable runnable) {
-        CommandSender oldSender = getSender();
+    public String getSenderId() {
+        return serverUtil.getSenderId(getSender());
+    }
+
+    /**
+     * Run a {@param function} with a specific {@param sender} in the context
+     *
+     * @param sender   The sender to be set at the context
+     * @param function The code to be executed
+     * @return the value returned by the function
+     */
+    public <T, S extends CommandSender> T runWithSender(S sender, Function<S, T> function) {
+        val oldSender = getSender();
         setSender(sender);
         try {
-            runnable.run();
+            return function.apply(sender);
         } finally {
             setSender(oldSender);
         }
     }
 
-    @Bean
-    Server serverBean() {
-        return Bukkit.getServer();
+
+    /**
+     * Run a {@param function} with a specific {@param sender} in the context
+     *
+     * @param sender   The sender to be set at the context
+     * @param function The code to be executed
+     */
+    public <S extends CommandSender> void runWithSender(S sender, Consumer<S> function) {
+        runWithSender(sender, (s) -> {
+            function.accept(s);
+            return null;
+        });
     }
 
-    @Bean
-    Plugin pluginBean(Server server) {
-        return server.getPluginManager().getPlugin(pluginName);
-    }
-
-    @Bean
-    BukkitScheduler schedulerBean(Server server) {
-        return server.getScheduler();
+    /**
+     * Run a {@param runnable} with a specific {@param sender} in the context
+     *
+     * @param sender   The sender to be set at the context
+     * @param runnable The code to be executed
+     */
+    public <S extends CommandSender> void runWithSender(S sender, Runnable runnable) {
+        runWithSender(sender, (s) -> {
+            runnable.run();
+            return null;
+        });
     }
 
 }

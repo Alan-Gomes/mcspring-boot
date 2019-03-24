@@ -3,18 +3,17 @@ package dev.alangomes.springspigot.security;
 import dev.alangomes.springspigot.context.Context;
 import dev.alangomes.springspigot.exception.PermissionDeniedException;
 import dev.alangomes.springspigot.exception.PlayerNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
@@ -25,7 +24,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static jdk.nashorn.internal.runtime.JSType.toBoolean;
 
+@Slf4j
 @Aspect
 @Component
 @Scope("singleton")
@@ -40,8 +39,6 @@ class SecurityAspect implements Listener {
 
     @Autowired
     private Context context;
-
-    private Logger logger = LoggerFactory.getLogger(SecurityAspect.class);
 
     private final Map<String, EvaluationContext> contextCache = new ConcurrentHashMap<>();
 
@@ -52,14 +49,14 @@ class SecurityAspect implements Listener {
     @Order(0)
     @Around("@annotation(dev.alangomes.springspigot.security.Authorize) || @within(dev.alangomes.springspigot.security.Authorize)")
     public Object checkPermission(ProceedingJoinPoint joinPoint) throws Throwable {
-        CommandSender sender = context.getSender();
+        val sender = context.getSender();
         if (sender == null) {
             throw new PlayerNotFoundException();
         }
-        String expressionSource = ((MethodSignature) joinPoint.getSignature()).getMethod().getAnnotation(Authorize.class).value();
+        val expressionSource = ((MethodSignature) joinPoint.getSignature()).getMethod().getAnnotation(Authorize.class).value();
 
-        EvaluationContext senderContext = contextCache.computeIfAbsent(sender.getName(), n -> new StandardEvaluationContext(sender));
-        Expression expression = expressionCache.computeIfAbsent(expressionSource, parser::parseExpression);
+        val senderContext = contextCache.computeIfAbsent(sender.getName(), n -> new StandardEvaluationContext(sender));
+        val expression = expressionCache.computeIfAbsent(expressionSource, parser::parseExpression);
         if (!toBoolean(expression.getValue(senderContext, Boolean.class))) {
             throw new PermissionDeniedException(expressionSource);
         }
@@ -69,16 +66,16 @@ class SecurityAspect implements Listener {
     @Order(1)
     @Before("@annotation(dev.alangomes.springspigot.security.Audit) || @within(dev.alangomes.springspigot.security.Audit)")
     public void auditCall(JoinPoint joinPoint) {
-        CommandSender sender = context.getSender();
-        Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
-        Audit audit = method.getAnnotation(Audit.class);
+        val sender = context.getSender();
+        val method = ((MethodSignature) joinPoint.getSignature()).getMethod();
+        val audit = method.getAnnotation(Audit.class);
         if (sender != null || !audit.senderOnly()) {
-            String signature = method.getDeclaringClass().getName() + "." + method.getName();
-            String arguments = Arrays.stream(joinPoint.getArgs()).map(String::valueOf).collect(Collectors.joining(", "));
+            val signature = method.getDeclaringClass().getName() + "." + method.getName();
+            val arguments = Arrays.stream(joinPoint.getArgs()).map(String::valueOf).collect(Collectors.joining(", "));
             if (sender != null) {
-                logger.info(String.format("Player %s invoked %s(%s)", sender.getName(), signature, arguments));
+                log.info(String.format("Player %s invoked %s(%s)", sender.getName(), signature, arguments));
             } else {
-                logger.info(String.format("Server invoked %s(%s)", signature, arguments));
+                log.info(String.format("Server invoked %s(%s)", signature, arguments));
             }
         }
     }

@@ -18,7 +18,6 @@ import org.springframework.core.env.PropertiesPropertySource;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
@@ -78,9 +77,6 @@ public class SpringSpigotInitializerTest {
         Map<String, Object> props = propertySource.getSource();
 
         assertEquals(PLUGIN_NAME, props.get("spigot.plugin"));
-        assertNotNull(props.get("spigot.messages.command_error"));
-        assertNotNull(props.get("spigot.messages.missing_parameter_error"));
-        assertNotNull(props.get("spigot.messages.parameter_error"));
     }
 
 }

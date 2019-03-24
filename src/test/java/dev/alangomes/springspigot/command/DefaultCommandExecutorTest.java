@@ -1,13 +1,9 @@
-package dev.alangomes.springspigot;
+package dev.alangomes.springspigot.command;
 
 import dev.alangomes.springspigot.configuration.Instance;
-import dev.alangomes.springspigot.context.Context;
 import dev.alangomes.springspigot.picocli.CommandLineDefinition;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandException;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.server.ServerCommandEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,13 +17,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 
-import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CommandInterceptorTest {
+public class DefaultCommandExecutorTest {
 
     @Mock
     private ApplicationContext applicationContext;
@@ -36,16 +33,10 @@ public class CommandInterceptorTest {
     private CommandLineDefinition commandLineDefinition;
 
     @Mock
-    private Context context;
-
-    @Mock
     private Runnable commandRunnable;
 
     @Mock
     private Callable commandCallable;
-
-    @Mock
-    private Player player;
 
     @Mock
     private CommandLine command, commandLine;
@@ -54,15 +45,13 @@ public class CommandInterceptorTest {
     private CommandLine.Model.ArgSpec argument;
 
     @InjectMocks
-    private CommandInterceptor commandInterceptor;
-
-    private PlayerCommandPreprocessEvent event;
+    private DefaultCommandExecutor commandExecutor;
 
     @Before
     public void setup() {
         Instance<Boolean> cacheEnabled = mock(Instance.class);
         when(cacheEnabled.get()).thenReturn(false);
-        commandInterceptor.setCacheEnabled(cacheEnabled);
+        commandExecutor.setCacheEnabled(cacheEnabled);
 
         when(commandLineDefinition.build(applicationContext)).thenReturn(commandLine);
         when(commandLine.parse(any())).thenReturn(Collections.singletonList(command));
@@ -71,18 +60,13 @@ public class CommandInterceptorTest {
 
         when(argument.paramLabel()).thenReturn("<parameter>");
 
-        event = new PlayerCommandPreprocessEvent(player, "/say hello", Collections.emptySet());
-        doAnswer(i -> {
-            ((Runnable) i.getArguments()[1]).run();
-            return null;
-        }).when(context).runWithSender(any(), any());
     }
 
     @Test
     public void shouldRunExistingCommandSuccessfully() {
-        commandInterceptor.onPlayerCommand(event);
+        CommandResult result = commandExecutor.execute("say", "hello");
 
-        assertTrue(event.isCancelled());
+        assertTrue(result.isExists());
         verify(commandLineDefinition).build(applicationContext);
         verify(commandLine).parse("say", "hello");
         verify(commandRunnable).run();
@@ -90,10 +74,9 @@ public class CommandInterceptorTest {
 
     @Test
     public void shouldRunExistingCommandSuccessfullyFromConsole() {
-        ServerCommandEvent serverCommandEvent = new ServerCommandEvent(player, "say hello");
-        commandInterceptor.onServerCommand(serverCommandEvent);
+        CommandResult result = commandExecutor.execute("say", "hello");
 
-        assertTrue(serverCommandEvent.isCancelled());
+        assertTrue(result.isExists());
         verify(commandLine).parse("say", "hello");
         verify(commandRunnable).run();
     }
@@ -101,9 +84,9 @@ public class CommandInterceptorTest {
     @Test
     public void shouldIgnoreUnknownCommand() {
         when(commandLine.parse(any())).thenReturn(Collections.emptyList());
-        commandInterceptor.onPlayerCommand(event);
+        CommandResult result = commandExecutor.execute("say", "hello");
 
-        assertFalse(event.isCancelled());
+        assertFalse(result.isExists());
         verify(commandLine).parse("say", "hello");
     }
 
@@ -111,9 +94,9 @@ public class CommandInterceptorTest {
     public void shouldIgnoreInvalidCommand() {
         when(commandLine.parse(any())).thenThrow(new CommandLine.UnmatchedArgumentException(commandLine, ""));
 
-        commandInterceptor.onPlayerCommand(event);
+        CommandResult result = commandExecutor.execute("say", "hello");
 
-        assertFalse(event.isCancelled());
+        assertFalse(result.isExists());
         verify(commandLine).parse("say", "hello");
     }
 
@@ -122,12 +105,12 @@ public class CommandInterceptorTest {
         when(commandCallable.call()).thenReturn("hello world");
         when(command.getCommand()).thenReturn(commandCallable);
 
-        commandInterceptor.onPlayerCommand(event);
+        CommandResult result = commandExecutor.execute("say", "hello");
 
-        assertTrue(event.isCancelled());
+        assertTrue(result.isExists());
         verify(commandLine).parse("say", "hello");
         verify(commandCallable).call();
-        verify(player).sendMessage("hello world");
+        assertEquals("hello world", result.getOutput().get(0));
     }
 
     @Test
@@ -135,74 +118,74 @@ public class CommandInterceptorTest {
         when(commandCallable.call()).thenReturn(Arrays.asList("hello", "world"));
         when(command.getCommand()).thenReturn(commandCallable);
 
-        commandInterceptor.onPlayerCommand(event);
+        CommandResult result = commandExecutor.execute("say", "hello");
 
-        assertTrue(event.isCancelled());
+        assertTrue(result.isExists());
         verify(commandLine).parse("say", "hello");
         verify(commandCallable).call();
-        verify(player).sendMessage("hello");
-        verify(player).sendMessage("world");
+        assertEquals("hello", result.getOutput().get(0));
+        assertEquals("world", result.getOutput().get(1));
     }
 
     @Test
     public void shouldSendMissingParameterError() {
         Instance<String> instance = mock(Instance.class);
         when(instance.get()).thenReturn("&amissing parameter: %s");
-        commandInterceptor.setMissingParameterErrorMessage(instance);
+        commandExecutor.setMissingParameterErrorMessage(instance);
         when(commandLine.parse(any())).thenThrow(new CommandLine.MissingParameterException(commandLine, argument, ""));
 
-        commandInterceptor.onPlayerCommand(event);
+        CommandResult result = commandExecutor.execute("say", "hello");
 
-        assertTrue(event.isCancelled());
+        assertTrue(result.isExists());
         verify(commandLine).parse("say", "hello");
-        verify(player).sendMessage(ChatColor.GREEN + "missing parameter: <parameter>");
+        assertEquals(ChatColor.GREEN + "missing parameter: <parameter>", result.getOutput().get(0));
     }
 
     @Test
     public void shouldSendInvalidParameterError() {
         Instance<String> instance = mock(Instance.class);
         when(instance.get()).thenReturn("&binvalid parameter: %s");
-        commandInterceptor.setParameterErrorMessage(instance);
+        commandExecutor.setParameterErrorMessage(instance);
         when(commandLine.parse(any())).thenThrow(new CommandLine.ParameterException(commandLine, "", argument, ""));
 
-        commandInterceptor.onPlayerCommand(event);
+        CommandResult result = commandExecutor.execute("say", "hello");
 
-        assertTrue(event.isCancelled());
+        assertTrue(result.isExists());
         verify(commandLine).parse("say", "hello");
-        verify(player).sendMessage(ChatColor.AQUA + "invalid parameter: <parameter>");
+        assertEquals(ChatColor.AQUA + "invalid parameter: <parameter>", result.getOutput().get(0));
     }
 
     @Test
     public void shouldSendCommandErrorMessage() {
         when(commandLine.parse(any())).thenThrow(new CommandException("generic error"));
 
-        commandInterceptor.onPlayerCommand(event);
+        CommandResult result = commandExecutor.execute("say", "hello");
 
-        assertTrue(event.isCancelled());
+        assertTrue(result.isExists());
         verify(commandLine).parse("say", "hello");
-        verify(player).sendMessage(ChatColor.RED + "generic error");
+        assertEquals(ChatColor.RED + "generic error", result.getOutput().get(0));
     }
 
     @Test
     public void shouldSendGenericErrorMessage() {
         Instance<String> instance = mock(Instance.class);
         when(instance.get()).thenReturn("&cunexpected error");
-        commandInterceptor.setCommandErrorMessage(instance);
+        commandExecutor.setCommandErrorMessage(instance);
         when(commandLine.parse(any())).thenThrow(new RuntimeException("ignored message"));
 
-        commandInterceptor.onPlayerCommand(event);
+        CommandResult result = commandExecutor.execute("say", "hello");
 
-        assertTrue(event.isCancelled());
+        assertTrue(result.isExists());
         verify(commandLine).parse("say", "hello");
-        verify(player).sendMessage(ChatColor.RED + "unexpected error");
+        assertEquals(ChatColor.RED + "unexpected error", result.getOutput().get(0));
     }
 
     @Test
     public void shouldStoreCommandLineCache() {
-        when(commandInterceptor.getCacheEnabled().get()).thenReturn(true);
+        when(commandExecutor.getCacheEnabled().get()).thenReturn(true);
 
-        commandInterceptor.onPlayerCommand(event);
-        commandInterceptor.onPlayerCommand(event);
+        commandExecutor.execute("say", "hello");
+        commandExecutor.execute("say", "hello");
 
         verify(commandLineDefinition).build(applicationContext);
     }

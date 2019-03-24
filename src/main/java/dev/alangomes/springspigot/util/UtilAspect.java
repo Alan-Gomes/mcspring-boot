@@ -1,24 +1,22 @@
 package dev.alangomes.springspigot.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Aspect
 @Component
 @Scope("singleton")
 class UtilAspect {
-
-    private Logger logger = LoggerFactory.getLogger(UtilAspect.class);
 
     @Autowired
     private BukkitScheduler scheduler;
@@ -39,7 +37,7 @@ class UtilAspect {
             try {
                 joinPoint.proceed();
             } catch (Throwable throwable) {
-                logger.error("Error in synchronous task", throwable);
+                log.error("Error in synchronous task", throwable);
             }
         }, 0);
         return null;

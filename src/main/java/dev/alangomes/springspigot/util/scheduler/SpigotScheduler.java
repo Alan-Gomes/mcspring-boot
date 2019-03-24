@@ -1,5 +1,6 @@
-package dev.alangomes.springspigot.util;
+package dev.alangomes.springspigot.util.scheduler;
 
+import lombok.AllArgsConstructor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.springframework.scheduling.Trigger;
@@ -7,35 +8,23 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.Date;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
 
+@AllArgsConstructor
 public class SpigotScheduler extends ThreadPoolTaskScheduler {
 
     private final Plugin plugin;
 
     private final BukkitScheduler scheduler;
 
-    public SpigotScheduler(Plugin plugin, BukkitScheduler scheduler) {
-        this.plugin = plugin;
-        this.scheduler = scheduler;
-    }
-
     private Runnable wrapSync(Runnable task) {
-        return () -> scheduler.scheduleSyncDelayedTask(plugin, task);
+        return new WrappedRunnable(plugin, scheduler, task);
     }
 
     private <T> Callable<T> wrapSync(Callable<T> task) {
-        return () -> {
-            CompletableFuture<T> future = new CompletableFuture<>();
-            scheduler.scheduleSyncDelayedTask(plugin, () -> {
-                try {
-                    future.complete(task.call());
-                } catch (Throwable throwable) {
-                    future.completeExceptionally(throwable);
-                }
-            });
-            return future.get(1, TimeUnit.MINUTES);
-        };
+        return new WrappedCallable<>(plugin, scheduler, task);
     }
 
     @Override
@@ -95,7 +84,7 @@ public class SpigotScheduler extends ThreadPoolTaskScheduler {
 
     @Override
     protected void cancelRemainingTask(Runnable task) {
-        super.cancelRemainingTask(task);
+        super.cancelRemainingTask(wrapSync(task));
     }
 
 }

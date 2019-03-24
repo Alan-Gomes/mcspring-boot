@@ -1,0 +1,114 @@
+package dev.alangomes.springspigot.command;
+
+import com.google.common.annotations.VisibleForTesting;
+import dev.alangomes.springspigot.configuration.DynamicValue;
+import dev.alangomes.springspigot.configuration.Instance;
+import dev.alangomes.springspigot.picocli.CommandLineDefinition;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
+import picocli.CommandLine;
+
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang.BooleanUtils.toBoolean;
+
+@Component
+@ConditionalOnClass(Bukkit.class)
+@Primary
+@Slf4j
+public class DefaultCommandExecutor implements CommandExecutor {
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @Autowired
+    private CommandLineDefinition cli;
+
+    @Setter(value = AccessLevel.PACKAGE, onMethod_ = @VisibleForTesting)
+    @DynamicValue("${spigot.messages.command_error:&cAn internal error occurred while attemping to perform this command}")
+    private Instance<String> commandErrorMessage;
+
+    @Setter(value = AccessLevel.PACKAGE, onMethod_ = @VisibleForTesting)
+    @DynamicValue("${spigot.messages.missing_parameter_error:&cMissing parameter: %s}")
+    private Instance<String> missingParameterErrorMessage;
+
+    @Setter(value = AccessLevel.PACKAGE, onMethod_ = @VisibleForTesting)
+    @DynamicValue("${spigot.messages.parameter_error:&cInvalid parameter: %s}")
+    private Instance<String> parameterErrorMessage;
+
+    @Getter(value = AccessLevel.PACKAGE, onMethod_ = @VisibleForTesting)
+    @Setter(value = AccessLevel.PACKAGE, onMethod_ = @VisibleForTesting)
+    @DynamicValue("${spigot.commands.enable_cache:true}")
+    private Instance<Boolean> cacheEnabled;
+
+    private CommandLine commandLineCache;
+
+    @Override
+    public CommandResult execute(String... commandParts) {
+        if (commandParts.length == 0) {
+            return CommandResult.unknown();
+        }
+        try {
+            if (!toBoolean(cacheEnabled.get()) || commandLineCache == null) {
+                commandLineCache = cli.build(applicationContext);
+            }
+            val output = new ArrayList<String>();
+            val commands = commandLineCache.parse(commandParts);
+
+            boolean executed = false;
+            for (CommandLine commandLine : commands) {
+                val command = commandLine.getCommand();
+
+                if (command instanceof Runnable) {
+                    executed = true;
+                    ((Runnable) command).run();
+                } else if (command instanceof Callable) {
+                    executed = true;
+                    val result = ((Callable) command).call();
+                    output.addAll(buildOutput(result));
+                }
+            }
+            return executed ? new CommandResult(output) : CommandResult.unknown();
+        } catch (CommandLine.UnmatchedArgumentException ignored) {
+        } catch (CommandLine.MissingParameterException ex) {
+            val message = String.format(missingParameterErrorMessage.get(), ex.getMissing().get(0).paramLabel());
+            return new CommandResult(ChatColor.translateAlternateColorCodes('&', message), true);
+        } catch (CommandLine.ParameterException ex) {
+            val message = String.format(parameterErrorMessage.get(), ex.getArgSpec().paramLabel());
+            return new CommandResult(ChatColor.translateAlternateColorCodes('&', message), true);
+        } catch (CommandException ex) {
+            return new CommandResult(ChatColor.RED + ex.getMessage(), true);
+        } catch (Exception ex) {
+            log.error("Unexpected exception while running /" + StringUtils.join(commandParts, " "), ex);
+            return new CommandResult(ChatColor.translateAlternateColorCodes('&', commandErrorMessage.get()), true);
+        }
+        return CommandResult.unknown();
+    }
+
+    private List<String> buildOutput(Object result) {
+        if (result instanceof String) {
+            return Collections.singletonList(ChatColor.translateAlternateColorCodes('&', (String) result));
+        } else if (result instanceof Collection) {
+            return ((Collection<?>) result)
+                    .stream()
+                    .flatMap(res -> buildOutput(res).stream())
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+}
