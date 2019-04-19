@@ -158,7 +158,7 @@ Different from a regular web application, a Bukkit server does not have a concep
 all command and event executions are (almost) in the same thread without any definition of the sender in context
 (aka who triggered the event/command).
 
-To circumvent this limitation and allow the identification of the sender, this starter implements the `ServerContext`,
+To circumvent this limitation and allow the identification of the sender, this starter implements the `Context`,
 a bean that stores senders based on the current thread id. Since almost every execution is in the same thread
 (the main server thread), it is safe to store a single user per time, if the execution is asynchronous, it will use another context.
 
