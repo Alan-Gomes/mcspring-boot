@@ -43,6 +43,8 @@ public class SpringSpigotAutoConfigurationTest {
         beans.put("b1", mock(Listener.class));
         beans.put("b2", mock(Listener.class));
         when(context.getBeansOfType(Listener.class)).thenReturn(beans);
+        when(context.getBean(Server.class)).thenReturn(server);
+        when(context.getBean(Plugin.class)).thenReturn(plugin);
     }
 
     @Test

@@ -1,9 +1,8 @@
 package dev.alangomes.springspigot.util;
 
+import dev.alangomes.springspigot.util.scheduler.Scheduler;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.bukkit.Server;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -21,10 +20,7 @@ public class UtilAspectTest {
     private ProceedingJoinPoint joinPoint;
 
     @Mock
-    private BukkitScheduler scheduler;
-
-    @Mock
-    private Plugin plugin;
+    private Scheduler scheduler;
 
     @Mock
     private Server server;
@@ -42,7 +38,7 @@ public class UtilAspectTest {
         utilAspect.synchronizeCall(joinPoint);
 
         verify(joinPoint).proceed();
-        verify(scheduler, never()).scheduleSyncDelayedTask(eq(plugin), any(Runnable.class), anyLong());
+        verify(scheduler, never()).scheduleSyncDelayedTask(any(Runnable.class), anyLong());
     }
 
     @Test
@@ -52,7 +48,7 @@ public class UtilAspectTest {
         utilAspect.synchronizeCall(joinPoint);
 
         verify(joinPoint, never()).proceed();
-        verify(scheduler).scheduleSyncDelayedTask(eq(plugin), runnableCaptor.capture(), eq(0L));
+        verify(scheduler).scheduleSyncDelayedTask(runnableCaptor.capture(), eq(0L));
 
         Runnable runnable = runnableCaptor.getValue();
         runnable.run();

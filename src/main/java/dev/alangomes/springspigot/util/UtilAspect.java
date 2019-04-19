@@ -1,12 +1,11 @@
 package dev.alangomes.springspigot.util;
 
+import dev.alangomes.springspigot.util.scheduler.Scheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.bukkit.Server;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
@@ -19,10 +18,7 @@ import org.springframework.stereotype.Component;
 class UtilAspect {
 
     @Autowired
-    private BukkitScheduler scheduler;
-
-    @Autowired
-    private Plugin plugin;
+    private Scheduler scheduler;
 
     @Autowired
     private Server server;
@@ -33,7 +29,7 @@ class UtilAspect {
         if (server.isPrimaryThread()) {
             return joinPoint.proceed();
         }
-        scheduler.scheduleSyncDelayedTask(plugin, () -> {
+        scheduler.scheduleSyncDelayedTask(() -> {
             try {
                 joinPoint.proceed();
             } catch (Throwable throwable) {

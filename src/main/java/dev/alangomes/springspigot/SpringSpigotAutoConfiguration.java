@@ -27,12 +27,6 @@ import org.springframework.scheduling.TaskScheduler;
 class SpringSpigotAutoConfiguration {
 
     @Autowired
-    private Plugin plugin;
-
-    @Autowired
-    private Server server;
-
-    @Autowired
     private ConfigurableApplicationContext applicationContext;
 
     private boolean initialized = false;
@@ -42,6 +36,8 @@ class SpringSpigotAutoConfiguration {
         if (initialized) return;
         initialized = true;
         val beans = applicationContext.getBeansOfType(Listener.class).values();
+        val server = applicationContext.getBean(Server.class);
+        val plugin = applicationContext.getBean(Plugin.class);
         beans.forEach(bean -> server.getPluginManager().registerEvents(bean, plugin));
     }
 

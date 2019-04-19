@@ -11,13 +11,9 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
-import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -28,6 +24,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static jdk.nashorn.internal.runtime.JSType.toBoolean;
 
@@ -35,12 +32,10 @@ import static jdk.nashorn.internal.runtime.JSType.toBoolean;
 @Aspect
 @Component
 @Scope("singleton")
-class SecurityAspect implements Listener {
+class SecurityAspect {
 
     @Autowired
     private Context context;
-
-    private final Map<String, EvaluationContext> contextCache = new ConcurrentHashMap<>();
 
     private final Map<String, Expression> expressionCache = new ConcurrentHashMap<>();
 
@@ -53,9 +48,14 @@ class SecurityAspect implements Listener {
         if (sender == null) {
             throw new PlayerNotFoundException();
         }
-        val expressionSource = ((MethodSignature) joinPoint.getSignature()).getMethod().getAnnotation(Authorize.class).value();
+        val method = ((MethodSignature) joinPoint.getSignature()).getMethod();
+        val expressionSource = method.getAnnotation(Authorize.class).value();
 
-        val senderContext = contextCache.computeIfAbsent(sender.getName(), n -> new StandardEvaluationContext(sender));
+        val senderContext = new StandardEvaluationContext(sender);
+        val parameters = method.getParameters();
+        IntStream.range(0, parameters.length)
+                .forEach(i -> senderContext.setVariable(parameters[i].getName(), joinPoint.getArgs()[i]));
+
         val expression = expressionCache.computeIfAbsent(expressionSource, parser::parseExpression);
         if (!toBoolean(expression.getValue(senderContext, Boolean.class))) {
             throw new PermissionDeniedException(expressionSource);
@@ -78,11 +78,6 @@ class SecurityAspect implements Listener {
                 log.info(String.format("Server invoked %s(%s)", signature, arguments));
             }
         }
-    }
-
-    @EventHandler
-    void onQuit(PlayerQuitEvent event) {
-        contextCache.remove(event.getPlayer().getName());
     }
 
 }

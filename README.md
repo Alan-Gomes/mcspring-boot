@@ -1,6 +1,6 @@
 # Spring Boot Spigot Starter
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.alangomes/spigot-spring-boot-starter.svg)](https://search.maven.org/#artifactdetails%7Cdev.alangomes%7Cspigot-spring-boot-starter%7C0.4.0%7Cjar)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.alangomes/spigot-spring-boot-starter.svg)](https://search.maven.org/#artifactdetails%7Cdev.alangomes%7Cspigot-spring-boot-starter%7C0.6.0%7Cjar)
 [![License](https://img.shields.io/github/license/Alan-Gomes/mcspring-boot.svg?style=popout)](https://github.com/Alan-Gomes/mcspring-boot/blob/master/LICENSE)
 
 > A Spring boot starter for Bukkit/Spigot/PaperSpigot plugins
@@ -23,7 +23,7 @@ Add the Spring boot starter to your project
 <dependency>
   <groupId>dev.alangomes</groupId>
   <artifactId>spigot-spring-boot-starter</artifactId>
-  <version>0.5.0</version>
+  <version>0.6.0</version>
 </dependency>
 ```
 
@@ -169,20 +169,18 @@ To understand this better, let's take a look on this example:
 class PluginListeners implements Listener {
     
     @Autowired
-    private ServerContext serverContext;
+    private Context context;
     
     @Autowired
     private MyService myService;
 
     @EventHandler
     void onJoin(PlayerJoinEvent event) {
-        serverContext.setSender(event.getPlayer());
-        try {
+        context.runWithSender(e.getPlayer(), () -> {
             myService.doSomething();
-        } catch (Exception exception) {
-            event.getPlayer().sendMessage("failed to do something");
-        }
-        serverContext.setSender(null);
+        });
+        // or, if you are already familiar with Java 8 method references
+        context.runWithSender(e.getPlayer(), myService::doSomething);
     }
 
 }
@@ -192,23 +190,6 @@ As you can see, we set the sender (player) of the current context at the start o
 With this setting, the `MyService` and all dependent services will be able to get the player via `@Autowired`, also,
 every method containing `@Authorize` or `@Audit` will be able to detect the current player to apply the authorization
 rules or to display in the log.
-
-**Important**: the sender of the context must be always set to `null` at the end of the method, otherwise it can lead to
-security issues.
-
-If you don't want to write `try`'s and `catch`es all over your code, the `ServerContext` also offers a utility method to
-automatically do all this job.
-
-```java
-@EventHandler
-void onJoin(PlayerJoinEvent event) {
-    serverContext.runWithSender(e.getPlayer(), () -> {
-        myService.doSomething();
-    });
-    // or, if you are already familiar with Java 8 method references
-    serverContext.runWithSender(e.getPlayer(), myService::doSomething);
-}
-```
 
 ## Synchronization
 
