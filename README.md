@@ -1,6 +1,6 @@
 # Spring Boot Spigot Starter
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.alangomes/spigot-spring-boot-starter.svg)](https://search.maven.org/#artifactdetails%7Cdev.alangomes%7Cspigot-spring-boot-starter%7C0.6.0%7Cjar)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.alangomes/spigot-spring-boot-starter.svg)](https://search.maven.org/#artifactdetails%7Cdev.alangomes%7Cspigot-spring-boot-starter%7C0.7.0%7Cjar)
 [![License](https://img.shields.io/github/license/Alan-Gomes/mcspring-boot.svg?style=popout)](https://github.com/Alan-Gomes/mcspring-boot/blob/master/LICENSE)
 
 > A Spring boot starter for Bukkit/Spigot/PaperSpigot plugins
@@ -23,7 +23,7 @@ Add the Spring boot starter to your project
 <dependency>
   <groupId>dev.alangomes</groupId>
   <artifactId>spigot-spring-boot-starter</artifactId>
-  <version>0.6.0</version>
+  <version>0.7.0</version>
 </dependency>
 ```
 

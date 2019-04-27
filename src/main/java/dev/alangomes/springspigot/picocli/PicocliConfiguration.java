@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import picocli.CommandLine;
 
@@ -13,7 +14,7 @@ import java.util.*;
 
 /**
  * @author Thibaud Leprêtre
- *
+ * <p>
  * Modified to support rebuild and to decouple from spring command line runner.
  * @see <a href="https://github.com/kakawait/picocli-spring-boot-starter">Spring boot Picocli starter</a>
  */
@@ -36,7 +37,7 @@ public class PicocliConfiguration {
         if (command == null) {
             return null;
         }
-        return applicationContext.getType(command).getAnnotation(CommandLine.Command.class).name();
+        return getType(applicationContext, command).getAnnotation(CommandLine.Command.class).name();
     }
 
     private String getCommandName(Class<?> commandClass) {
@@ -49,7 +50,7 @@ public class PicocliConfiguration {
     private List<String> getMainCommands(Collection<String> candidates, ApplicationContext context) {
         List<String> mainCommands = new ArrayList<>();
         for (String candidate : candidates) {
-            Class<?> clazz = context.getType(candidate);
+            Class<?> clazz = getType(context, candidate);
             Method method = ReflectionUtils.findMethod(CommandLine.Command.class, "name");
             if (clazz.isAnnotationPresent(CommandLine.Command.class)
                     && method != null
@@ -82,14 +83,14 @@ public class PicocliConfiguration {
         Map<Node, List<String>> tree = new LinkedHashMap<>();
 
         commands.stream()
-                .filter(o -> applicationContext.getType(o) != null)
+                .filter(o -> getType(applicationContext, o) != null)
                 .sorted((o1, o2) -> {
-                    int l1 = getNestedLevel(applicationContext.getType(o1));
-                    int l2 = getNestedLevel(applicationContext.getType(o2));
+                    int l1 = getNestedLevel(getType(applicationContext, o1));
+                    int l2 = getNestedLevel(getType(applicationContext, o2));
                     return Integer.compare(l1, l2);
                 })
                 .forEach(o -> {
-                    Class<?> clazz = applicationContext.getType(o);
+                    Class<?> clazz = getType(applicationContext, o);
                     Optional<Class> parentClass = getParentClass(clazz);
                     parentClass.ifPresent(c -> {
                         List<String> objects = tree.get(new Node(c, null, null));
@@ -108,7 +109,7 @@ public class PicocliConfiguration {
         Map<Class<?>, CommandLineDefinition> parents = new HashMap<>();
         for (Map.Entry<Node, List<String>> entry : findCommands(commands, applicationContext).entrySet()) {
             Node node = entry.getKey();
-            if (node.getParent() != null && !node.getParent().equals(applicationContext.getType(current.getBeanName()))) {
+            if (node.getParent() != null && !node.getParent().equals(getType(applicationContext, current.getBeanName()))) {
                 continue;
             }
             List<String> children = entry.getValue();
@@ -134,6 +135,10 @@ public class PicocliConfiguration {
             }
             parents.put(node.getClazz(), current);
         }
+    }
+
+    private Class<?> getType(ApplicationContext context, String beanName) {
+        return ClassUtils.getUserClass(context.getType(beanName));
     }
 
     private static class Node {
