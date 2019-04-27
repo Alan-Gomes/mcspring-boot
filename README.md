@@ -152,6 +152,10 @@ public void doSomething() {
 }
 ```
 
+**WARNING**: Due to a limitation in the [Picocli](http://picocli.info/) reflection implementation, the use of `@Authorize`
+ as well as `@Synchronize` and `@Audit` is not supported on command classes, it is highly recommended to make use of these 
+ features in a separate class, for example: a service.
+
 ## <a name="context"></a> Understanding contexts
 
 Different from a regular web application, a Bukkit server does not have a concept of session,
