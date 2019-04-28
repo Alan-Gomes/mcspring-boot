@@ -1,0 +1,30 @@
+<settings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xsi:schemalocation="http://maven.apache.org/SETTINGS/1.0.0
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <servers>
+        <server>
+            <id>oss.sonatype.org</id>
+            <username>${env.SONATYPE_USERNAME}</username>
+            <password>${env.SONATYPE_PASSWORD}</password>
+        </server>
+        <server>
+            <id>31700098F91E5535</id>
+            <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+        </server>
+    </servers>
+
+    <profiles>
+        <profile>
+            <id>gpg</id>
+            <properties>
+                <gpg.executable>gpg</gpg.executable>
+                <gpg.keyname>31700098F91E5535</gpg.keyname>
+            </properties>
+        </profile>
+    </profiles>
+
+    <activeProfiles>
+        <activeProfile>gpg</activeProfile>
+    </activeProfiles>
+</settings>
+
