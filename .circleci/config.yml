@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  build:
+  test:
     docker:
       - image: maven:3-jdk-8-alpine
     steps:
@@ -13,3 +13,23 @@ jobs:
             - ~/.m2
           key: spring-boot-starter-spigot-{{ checksum "pom.xml" }}
       - run: mvn clean test jacoco:report coveralls:report -Dcoveralls.token=$COVERALLS_TOKEN
+  deploy:
+    docker:
+      - image: maven:3-jdk-8-alpine
+    steps:
+      - checkout
+      - run: mvn clean test
+workflows:
+  version: 2
+  branch_test:
+    jobs:
+      - test
+  master_deploy:
+    jobs:
+      - deploy:
+          filters:
+            tags:
+              only: /^v.*/
+#            branches:
+#              only:
+#                - master
