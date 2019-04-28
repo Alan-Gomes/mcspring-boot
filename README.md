@@ -2,6 +2,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/dev.alangomes/spigot-spring-boot-starter.svg)](https://search.maven.org/#artifactdetails%7Cdev.alangomes%7Cspigot-spring-boot-starter%7C0.8.0%7Cjar)
 [![License](https://img.shields.io/github/license/Alan-Gomes/mcspring-boot.svg?style=popout)](https://github.com/Alan-Gomes/mcspring-boot/blob/master/LICENSE)
+[![Coverage Status](https://coveralls.io/repos/github/Alan-Gomes/mcspring-boot/badge.svg?branch=master)](https://coveralls.io/github/Alan-Gomes/mcspring-boot?branch=master)
 
 > A Spring boot starter for Bukkit/Spigot/PaperSpigot plugins
 
