@@ -3,6 +3,7 @@ package dev.alangomes.test;
 import dev.alangomes.springspigot.context.Context;
 import dev.alangomes.springspigot.exception.PermissionDeniedException;
 import dev.alangomes.springspigot.exception.PlayerNotFoundException;
+import dev.alangomes.springspigot.security.Audit;
 import dev.alangomes.springspigot.security.Authorize;
 import dev.alangomes.test.util.SpringSpigotTestInitializer;
 import org.bukkit.entity.Player;
@@ -22,11 +23,11 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(
-        classes = {TestApplication.class, AuthorizationTest.TestService.class},
+        classes = {TestApplication.class, SecurityTest.TestService.class},
         initializers = SpringSpigotTestInitializer.class
 )
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-public class AuthorizationTest {
+public class SecurityTest {
 
     @Autowired
     private TestService testService;
@@ -76,11 +77,13 @@ public class AuthorizationTest {
 
     @Service
     static class TestService {
+        @Audit(senderOnly = false)
         @Authorize("hasPermission('server.kill')")
         public int sum(int num1, int num2) {
             return num1 + num2;
         }
 
+        @Audit
         @Authorize("hasPermission('resource.' + #arg0 + '.create')")
         public String create(String resourceName) {
             return resourceName;

@@ -24,10 +24,6 @@ public class CommandResult {
         this.output = output != null ? Collections.unmodifiableList(new LinkedList<>(output)) : Collections.emptyList();
     }
 
-    public CommandResult(Collection<String> output, boolean errored) {
-        this(output, errored, true);
-    }
-
     public CommandResult(Collection<String> output) {
         this(output, false, true);
     }
