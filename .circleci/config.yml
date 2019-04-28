@@ -12,4 +12,4 @@ jobs:
           paths:
             - ~/.m2
           key: spring-boot-starter-spigot-{{ checksum "pom.xml" }}
-      - run: mvn clean test jacoco:report coveralls:report -Dcoveralls.token=$COVERALLS_TOKEN
+      - run: mvn clean test jacoco:report coveralls:report -Dcoveralls.token=$COVERALLS_TOKEN -o
