@@ -169,7 +169,7 @@ a bean that stores senders based on the current thread id. Since almost every ex
 To understand this better, let's take a look on this example:
 
 ```java
-@Component
+@Service
 class BusinessService {
     
     @Autowired
