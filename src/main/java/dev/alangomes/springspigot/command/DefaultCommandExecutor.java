@@ -69,20 +69,19 @@ public class DefaultCommandExecutor implements CommandExecutor {
             val output = new ArrayList<String>();
             val commands = commandLineCache.parse(commandParts);
 
-            boolean executed = false;
-            for (CommandLine commandLine : commands) {
-                val command = commandLine.getCommand();
-
-                if (command instanceof Runnable) {
-                    executed = true;
-                    ((Runnable) command).run();
-                } else if (command instanceof Callable) {
-                    executed = true;
-                    val result = ((Callable) command).call();
-                    output.addAll(buildOutput(result));
-                }
+            if (commands.isEmpty()) {
+                return CommandResult.unknown();
             }
-            return executed ? new CommandResult(output) : CommandResult.unknown();
+            val commandLine = commands.get(commands.size() - 1);
+            val command = commandLine.getCommand();
+
+            if (command instanceof Runnable) {
+                ((Runnable) command).run();
+            } else if (command instanceof Callable) {
+                val result = ((Callable) command).call();
+                output.addAll(buildOutput(result));
+            }
+            return new CommandResult(output);
         } catch (CommandLine.UnmatchedArgumentException ignored) {
         } catch (CommandLine.MissingParameterException ex) {
             val message = String.format(missingParameterErrorMessage.get(), ex.getMissing().get(0).paramLabel());

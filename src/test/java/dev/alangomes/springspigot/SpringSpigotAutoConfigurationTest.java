@@ -1,9 +1,7 @@
 package dev.alangomes.springspigot;
 
-import org.bukkit.Server;
+import dev.alangomes.springspigot.event.EventService;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,39 +17,30 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SpringSpigotAutoConfigurationTest {
-
-    @Mock
-    private Plugin plugin;
-
-    @Mock
-    private Server server;
-
+    
     @Mock
     private ConfigurableApplicationContext context;
 
     @Mock
-    private PluginManager pluginManager;
+    private EventService eventService;
 
     @InjectMocks
     private SpringSpigotAutoConfiguration startupHook;
 
     @Before
     public void setup() {
-        when(server.getPluginManager()).thenReturn(pluginManager);
-
         Map<String, Listener> beans = new HashMap<>();
         beans.put("b1", mock(Listener.class));
         beans.put("b2", mock(Listener.class));
         when(context.getBeansOfType(Listener.class)).thenReturn(beans);
-        when(context.getBean(Server.class)).thenReturn(server);
-        when(context.getBean(Plugin.class)).thenReturn(plugin);
+        when(context.getBean(EventService.class)).thenReturn(eventService);
     }
 
     @Test
     public void shouldRegisterAllListeners() {
         startupHook.onStartup(null);
 
-        verify(pluginManager, times(2)).registerEvents(notNull(), eq(plugin));
+        verify(eventService, times(2)).registerEvents(notNull());
     }
 
 }

@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Component
 @Scope("singleton")
@@ -80,6 +81,17 @@ public class Context {
         } finally {
             setSender(oldSender);
         }
+    }
+
+    /**
+     * Run a {@param function} with a specific {@param sender} in the context
+     *
+     * @param sender   The sender to be set at the context
+     * @param supplier The code to be executed
+     * @return the value returned by the function
+     */
+    public <T, S extends CommandSender> T runWithSender(S sender, Supplier<T> supplier) {
+        return runWithSender(sender, (Function<S, T>) (s) -> supplier.get());
     }
 
 

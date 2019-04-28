@@ -1,6 +1,6 @@
 # Spring Boot Spigot Starter
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.alangomes/spigot-spring-boot-starter.svg)](https://search.maven.org/#artifactdetails%7Cdev.alangomes%7Cspigot-spring-boot-starter%7C0.7.0%7Cjar)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.alangomes/spigot-spring-boot-starter.svg)](https://search.maven.org/#artifactdetails%7Cdev.alangomes%7Cspigot-spring-boot-starter%7C0.8.0%7Cjar)
 [![License](https://img.shields.io/github/license/Alan-Gomes/mcspring-boot.svg?style=popout)](https://github.com/Alan-Gomes/mcspring-boot/blob/master/LICENSE)
 
 > A Spring boot starter for Bukkit/Spigot/PaperSpigot plugins
@@ -23,7 +23,7 @@ Add the Spring boot starter to your project
 <dependency>
   <groupId>dev.alangomes</groupId>
   <artifactId>spigot-spring-boot-starter</artifactId>
-  <version>0.7.0</version>
+  <version>0.8.0</version>
 </dependency>
 ```
 
@@ -170,30 +170,32 @@ To understand this better, let's take a look on this example:
 
 ```java
 @Component
-class PluginListeners implements Listener {
+class BusinessService {
     
     @Autowired
     private Context context;
     
     @Autowired
-    private MyService myService;
+    private ChatService chatService;
 
-    @EventHandler
-    void onJoin(PlayerJoinEvent event) {
-        context.runWithSender(e.getPlayer(), () -> {
-            myService.doSomething();
+    public void sudoHello(Player player) {
+        context.runWithSender(player, () -> {
+            chatService.sayHello();
         });
         // or, if you are already familiar with Java 8 method references
-        context.runWithSender(e.getPlayer(), myService::doSomething);
+        context.runWithSender(player, chatService::sayHello);
     }
 
 }
 ```
 
-As you can see, we set the sender (player) of the current context at the start of the event, and reset the value at the end.
-With this setting, the `MyService` and all dependent services will be able to get the player via `@Autowired`, also,
-every method containing `@Authorize` or `@Audit` will be able to detect the current player to apply the authorization
+As you can see, we override the sender (player) of the current context.
+With this setting, the `ChatService` and all dependent services will see the `player` as the current player in the context, also,
+every method containing `@Authorize` or `@Audit` will be able to detect the this player to apply the authorization
 rules or to display in the log.
+
+**Note**: All commands and events are automatically intercepted to set the player in the context, the `runWithSender` method exists
+just to handle special cases.
 
 ## Synchronization
 

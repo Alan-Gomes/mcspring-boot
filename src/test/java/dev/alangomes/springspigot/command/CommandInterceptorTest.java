@@ -13,11 +13,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.function.Consumer;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CommandInterceptorTest {
@@ -36,11 +36,8 @@ public class CommandInterceptorTest {
 
     @Before
     public void setup() {
-        doAnswer(i -> {
-            ((Consumer) i.getArgument(1)).accept(i.getArgument(0));
-            return null;
-        }).when(context).runWithSender(any(), any(Consumer.class));
-
+        when(context.getPlayer()).thenReturn(player);
+        when(context.getSender()).thenReturn(player);
         when(commandExecutor.execute(any())).thenReturn(new CommandResult(Arrays.asList("message1", "message2")));
     }
 

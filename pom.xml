@@ -9,7 +9,7 @@
     <groupId>dev.alangomes</groupId>
     <artifactId>spigot-spring-boot-starter</artifactId>
     <packaging>jar</packaging>
-    <version>0.7.0</version>
+    <version>0.8.0</version>
     <description>Spring support for spigot plugins</description>
     <url>https://github.com/Alan-Gomes/mcspring-boot</url>
 
@@ -107,6 +107,11 @@
             <artifactId>picocli</artifactId>
             <version>3.9.5</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.9</version>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
@@ -124,6 +129,11 @@
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito2</artifactId>
             <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
 

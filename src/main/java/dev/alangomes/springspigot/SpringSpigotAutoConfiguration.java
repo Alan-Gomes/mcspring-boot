@@ -1,5 +1,6 @@
 package dev.alangomes.springspigot;
 
+import dev.alangomes.springspigot.event.EventService;
 import dev.alangomes.springspigot.util.scheduler.SpigotScheduler;
 import lombok.val;
 import org.bukkit.Bukkit;
@@ -36,9 +37,8 @@ class SpringSpigotAutoConfiguration {
         if (initialized) return;
         initialized = true;
         val beans = applicationContext.getBeansOfType(Listener.class).values();
-        val server = applicationContext.getBean(Server.class);
-        val plugin = applicationContext.getBean(Plugin.class);
-        beans.forEach(bean -> server.getPluginManager().registerEvents(bean, plugin));
+        val eventService = applicationContext.getBean(EventService.class);
+        beans.forEach(eventService::registerEvents);
     }
 
     @Bean

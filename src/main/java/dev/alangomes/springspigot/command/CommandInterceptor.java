@@ -24,21 +24,19 @@ class CommandInterceptor implements Listener {
     @EventHandler
     void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         if (event.isCancelled()) return;
-        context.runWithSender(event.getPlayer(), (player) -> {
-            val result = commandExecutor.execute(event.getMessage().substring(1).split(" "));
-            event.setCancelled(result.isExists());
-            result.getOutput().forEach(player::sendMessage);
-        });
+        val player = context.getPlayer();
+        val result = commandExecutor.execute(event.getMessage().substring(1).split(" "));
+        event.setCancelled(result.isExists());
+        result.getOutput().forEach(player::sendMessage);
     }
 
     @EventHandler
     void onServerCommand(ServerCommandEvent event) {
         if (event.isCancelled()) return;
-        context.runWithSender(event.getSender(), (sender) -> {
-            val result = commandExecutor.execute(event.getCommand().split(" "));
-            event.setCancelled(result.isExists());
-            result.getOutput().forEach(sender::sendMessage);
-        });
+        val sender = context.getSender();
+        val result = commandExecutor.execute(event.getCommand().split(" "));
+        event.setCancelled(result.isExists());
+        result.getOutput().forEach(sender::sendMessage);
     }
 
 }
