@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   test:
     docker:
-      - image: maven:3-jdk-8
+      - image: maven:3-jdk-8-alpine
     steps:
       - checkout
       - restore_cache:
@@ -15,10 +15,12 @@ jobs:
       - run: mvn clean test jacoco:report coveralls:report -Dcoveralls.token=$COVERALLS_TOKEN
   deploy:
     docker:
-      - image: maven:3-jdk-8-alpine
+      - image: maven:3-jdk-8
     steps:
       - checkout
-      - run: mvn clean test
+      - run: echo $GPG_SECRET_KEYS | base64 --decode | gpg --import
+      - run: echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust
+      - run: mvn --settings .maven.xml clean -Prelease deploy
 workflows:
   version: 2
   branch_test:
