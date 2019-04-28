@@ -11,6 +11,7 @@
 - Full [Picocli](http://picocli.info/) `@Command` support (thanks to [picocli-spring-boot-starter](https://github.com/kakawait/picocli-spring-boot-starter)) 
 - Secure calls with `@Authorize`
 - Automatic `Listener` registration
+- Session system
 - Full Spring's dependency injection support
 - Easier Bukkit main thread synchronization via `@Synchronize`
 - Support Spring scheduler on the bukkit main thread (`@Scheduled`)
@@ -155,6 +156,45 @@ public void doSomething() {
 **WARNING**: Due to a limitation in the [Picocli](http://picocli.info/) reflection implementation, the use of `@Authorize`
  as well as `@Synchronize` and `@Audit` is not supported on command classes, it is highly recommended to make use of these 
  features in a separate class, for example: a service.
+ 
+ ## Scheduling
+ 
+ Creating scheduled tasks is easier than ever, you can simply use the `Scheduler` bean, which allows you to create the tasks
+ without needing to have a reference to the `Plugin` or `Server`. This custom scheduler also keeps the current context
+ during the execution(s), everything just works.
+ 
+ Example:
+ 
+ ```java
+ @Service
+ class AnnounceService {
+    
+     @Autowired
+     private Scheduler scheduler;
+     
+     @Autowired
+     private Context context;
+     
+     @Autowired
+     private ChatService chatService;
+ 
+     public void announce(String message, long delay) {
+         scheduler.scheduleSyncDelayedTask(() -> {
+             chatService.broadcast(context.getPlayer().getName() + " said " + message);
+         }, delay);
+     }
+ 
+ }
+ ```
+ 
+ ## Sessions
+ 
+ Using the power of [contexts](#context), we introduce the concept of *sessions*: a per user key-value storage, which
+ allows you to work using the same idea of web session. Each session lives during the player time on the server, and is
+ cleared after logout.
+ 
+The usage is pretty simple, you just need to inject a `SessionService` and done. All methods are based in a map, which
+is bound to the player context, this means that the user session will be automatically managed, no worries. 
 
 ## <a name="context"></a> Understanding contexts
 

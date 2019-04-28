@@ -1,5 +1,6 @@
 package dev.alangomes.springspigot.event;
 
+import lombok.val;
 import org.bukkit.Server;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -30,8 +31,8 @@ public class EventService {
     }
 
     private void registerEvents(Listener listener, Method method) {
-        EventHandler handler = method.getAnnotation(EventHandler.class);
-        Class<? extends Event> eventType = (Class<? extends Event>) method.getParameters()[0].getType();
+        val handler = method.getAnnotation(EventHandler.class);
+        val eventType = (Class<? extends Event>) method.getParameters()[0].getType();
         server.getPluginManager().registerEvent(eventType, listener, handler.priority(), eventExecutor, plugin, handler.ignoreCancelled());
     }
 

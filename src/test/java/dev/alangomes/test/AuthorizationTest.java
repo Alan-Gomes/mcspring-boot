@@ -17,6 +17,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -57,6 +58,15 @@ public class AuthorizationTest {
     }
 
     @Test
+    public void shouldEvaluateMethodParameters() {
+        when(player.hasPermission(any(String.class))).thenReturn(false);
+        when(player.hasPermission("resource.test.create")).thenReturn(true);
+
+        String result = context.runWithSender(player, () -> testService.create("test"));
+        assertEquals("The call was not successful", "test", result);
+    }
+
+    @Test
     public void shouldPassCallThroughIfMethodIsNotAnnotated() {
         when(player.hasPermission("server.kill")).thenReturn(false);
 
@@ -69,6 +79,11 @@ public class AuthorizationTest {
         @Authorize("hasPermission('server.kill')")
         public int sum(int num1, int num2) {
             return num1 + num2;
+        }
+
+        @Authorize("hasPermission('resource.' + #arg0 + '.create')")
+        public String create(String resourceName) {
+            return resourceName;
         }
 
         public int multiply(int num1, int num2) {

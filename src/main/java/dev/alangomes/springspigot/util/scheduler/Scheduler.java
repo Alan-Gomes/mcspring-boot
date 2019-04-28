@@ -1,8 +1,6 @@
 package dev.alangomes.springspigot.util.scheduler;
 
 import dev.alangomes.springspigot.context.Context;
-import dev.alangomes.springspigot.util.ServerUtil;
-import lombok.val;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,24 +18,16 @@ public class Scheduler {
     @Autowired
     private Context context;
 
-    @Autowired
-    private ServerUtil serverUtil;
-
-    private Runnable wrapContext(Runnable runnable) {
-        val senderId = context.getSenderId();
-        return () -> context.runWithSender(serverUtil.getSenderFromId(senderId), runnable);
-    }
-
     public int scheduleSyncDelayedTask(Runnable runnable, long delay) {
-        return scheduler.scheduleSyncDelayedTask(plugin, wrapContext(runnable), delay);
+        return scheduler.scheduleSyncDelayedTask(plugin, context.wrap(runnable), delay);
     }
 
     public int scheduleSyncDelayedTask(Runnable runnable) {
-        return scheduler.scheduleSyncDelayedTask(plugin, wrapContext(runnable));
+        return scheduler.scheduleSyncDelayedTask(plugin, context.wrap(runnable));
     }
 
     public int scheduleSyncRepeatingTask(Runnable runnable, long delay, long repeat) {
-        return scheduler.scheduleSyncRepeatingTask(plugin, wrapContext(runnable), delay, repeat);
+        return scheduler.scheduleSyncRepeatingTask(plugin, context.wrap(runnable), delay, repeat);
     }
 
     public void cancelTask(int id) {

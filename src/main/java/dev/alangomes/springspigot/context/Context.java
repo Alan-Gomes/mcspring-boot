@@ -121,4 +121,48 @@ public class Context {
         });
     }
 
+    /**
+     * Wrap a {@param supplier} to keep the current context
+     *
+     * @param supplier The supplier to be wrapped
+     * @return The wrapped supplier
+     */
+    public <T> Supplier<T> wrap(Supplier<T> supplier) {
+        val senderId = getSenderId();
+        return () -> runWithSender(serverUtil.getSenderFromId(senderId), supplier);
+    }
+
+    /**
+     * Wrap a {@param runnable} to keep the current context
+     *
+     * @param runnable The runnable to be wrapped
+     * @return The wrapped runnable
+     */
+    public Runnable wrap(Runnable runnable) {
+        val senderId = getSenderId();
+        return () -> runWithSender(serverUtil.getSenderFromId(senderId), runnable);
+    }
+
+    /**
+     * Wrap a {@param consumer} to keep the current context
+     *
+     * @param consumer The consumer to be wrapped
+     * @return The wrapped consumer
+     */
+    public <T> Consumer<T> wrap(Consumer<T> consumer) {
+        val senderId = getSenderId();
+        return (v) -> runWithSender(serverUtil.getSenderFromId(senderId), () -> consumer.accept(v));
+    }
+
+    /**
+     * Wrap a {@param function} to keep the current context
+     *
+     * @param function The function to be wrapped
+     * @return The wrapped function
+     */
+    public <T, R> Function<T, R> wrap(Function<T, R> function) {
+        val senderId = getSenderId();
+        return (v) -> runWithSender(serverUtil.getSenderFromId(senderId), () -> function.apply(v));
+    }
+
 }
