@@ -15,7 +15,7 @@ jobs:
       -
       - run:
           name: "Run tests"
-          command: mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B clean test jacoco:report coveralls:report -Dcoveralls.token=$COVERALLS_TOKEN
+          command: "mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B clean test jacoco:report coveralls:report -Dcoveralls.token=$COVERALLS_TOKEN"
   deploy:
     docker:
       - image: maven:3-jdk-8
@@ -25,7 +25,7 @@ jobs:
       - run: echo $GPG_OWNERTRUST | base64 --decode | gpg --batch --import-ownertrust
       - run:
           name: "Release version"
-          command: mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B --settings .maven.xml clean -Prelease deploy
+          command: "mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B --settings .maven.xml clean -Prelease deploy"
 workflows:
   version: 2
   branch_test:
