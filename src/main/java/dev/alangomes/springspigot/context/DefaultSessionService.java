@@ -9,9 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 @Component
 @Scope("singleton")
@@ -21,26 +22,6 @@ public class DefaultSessionService implements SessionService, Listener {
     private Context context;
 
     private final Map<String, Map<String, Object>> sessions = new ConcurrentHashMap<>();
-
-    @Override
-    public void set(String key, Object value) {
-        getSession().put(key, value);
-    }
-
-    @Override
-    public Object get(String key) {
-        return getSession().get(key);
-    }
-
-    @Override
-    public void clear() {
-        sessions.remove(context.getSenderId());
-    }
-
-    @Override
-    public <V> V computeIfAbsent(String key, Function<String, ? extends V> function) {
-        return (V) getSession().computeIfAbsent(key, function);
-    }
 
     private Map<String, Object> getSession() {
         val senderId = context.getSenderId();
@@ -53,6 +34,66 @@ public class DefaultSessionService implements SessionService, Listener {
     @EventHandler
     private void onQuit(PlayerQuitEvent event) {
         context.runWithSender(event.getPlayer(), this::clear);
+    }
+
+    @Override
+    public int size() {
+        return getSession().size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return getSession().isEmpty();
+    }
+
+    @Override
+    public boolean containsKey(Object o) {
+        return getSession().containsKey(o);
+    }
+
+    @Override
+    public boolean containsValue(Object o) {
+        return getSession().containsValue(o);
+    }
+
+    @Override
+    public Object get(Object o) {
+        return getSession().get(o);
+    }
+
+    @Override
+    public Object put(String s, Object o) {
+        return getSession().put(s, o);
+    }
+
+    @Override
+    public Object remove(Object o) {
+        return getSession().remove(o);
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ?> map) {
+        getSession().putAll(map);
+    }
+
+    @Override
+    public void clear() {
+        getSession().clear();
+    }
+
+    @Override
+    public Set<String> keySet() {
+        return getSession().keySet();
+    }
+
+    @Override
+    public Collection<Object> values() {
+        return getSession().values();
+    }
+
+    @Override
+    public Set<Entry<String, Object>> entrySet() {
+        return getSession().entrySet();
     }
 
 }

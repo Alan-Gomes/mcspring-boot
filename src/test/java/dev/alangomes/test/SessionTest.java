@@ -54,8 +54,8 @@ public class SessionTest {
 
     @Test
     public void shouldStoreDifferentValuesForEachPlayer() {
-        context.runWithSender(player1, () -> sessionService.set("key.test", "value for player 1"));
-        context.runWithSender(player2, () -> sessionService.set("key.test", "value for player 2"));
+        context.runWithSender(player1, () -> sessionService.put("key.test", "value for player 1"));
+        context.runWithSender(player2, () -> sessionService.put("key.test", "value for player 2"));
 
         String value1 = context.runWithSender(player1, () -> (String) sessionService.get("key.test"));
         String value2 = context.runWithSender(player2, () -> (String) sessionService.get("key.test"));
@@ -65,8 +65,8 @@ public class SessionTest {
 
     @Test
     public void shouldClearPlayerSessionOnQuit() {
-        context.runWithSender(player1, () -> sessionService.set("key.test", "value for player 1"));
-        context.runWithSender(player2, () -> sessionService.set("key.test", "value for player 2"));
+        context.runWithSender(player1, () -> sessionService.put("key.test", "value for player 1"));
+        context.runWithSender(player2, () -> sessionService.put("key.test", "value for player 2"));
 
         eventExecutor.execute((Listener) sessionService, new PlayerQuitEvent(player2, ""));
 
@@ -78,8 +78,8 @@ public class SessionTest {
 
     @Test
     public void shouldClearPlayerSessionManually() {
-        context.runWithSender(player1, () -> sessionService.set("key.test", "value for player 1"));
-        context.runWithSender(player2, () -> sessionService.set("key.test", "value for player 2"));
+        context.runWithSender(player1, () -> sessionService.put("key.test", "value for player 1"));
+        context.runWithSender(player2, () -> sessionService.put("key.test", "value for player 2"));
 
         context.runWithSender(player1, () -> sessionService.clear());
 
