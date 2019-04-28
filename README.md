@@ -65,6 +65,9 @@ public class ExamplePlugin extends JavaPlugin {
 
 And that's it! Your plugin is ready to use all features from Picocli and Spring Boot!
 
+> **Note**: If you are getting a `No auto configuration classes found in META-INF/spring.factories` error, it means
+that your build configuration must be wrong, see [this issue](https://github.com/Alan-Gomes/mcspring-boot/issues/2#issuecomment-486331102) for more details.
+
 ## Creating a simple command
 
 All commands are based in the [Picocli's API](http://picocli.info/), the only difference is that the classes are
