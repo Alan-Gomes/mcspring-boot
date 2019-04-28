@@ -29,7 +29,7 @@ public class SpringSpigotInitializer implements
     public void initialize(ConfigurableApplicationContext context) {
         val propertySources = context.getEnvironment().getPropertySources();
         if (configAvailable) {
-            propertySources.addFirst(new ConfigurationPropertySource(plugin.getConfig()));
+            propertySources.addLast(new ConfigurationPropertySource(plugin.getConfig()));
         }
 
         val props = new Properties();

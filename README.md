@@ -16,6 +16,7 @@
 - Secure calls with `@Authorize`
 - Automatic `Listener` registration
 - Session system
+- Designed for testability
 - Full Spring's dependency injection support
 - Easier Bukkit main thread synchronization via `@Synchronize`
 - Support Spring scheduler on the bukkit main thread (`@Scheduled`)
@@ -256,3 +257,32 @@ annotation, which automatically schedules all calls under the hood if they are n
 **Important things if the call get scheduled**:
 - The return value of the method will **always** be `null`, so make sure your code is null-safe.
 - The method will **not** run immediately, it will on the next server tick, so make sure your code don't rely on that.
+
+## Testing
+
+This starter is designed to allow writing tests as easy as possible. Since Bukkit's own design is not the best for testing, it's
+still necessary to make some mocks in the server classes.
+
+First, you need to implement some mocks for the `Player`, `Server`, `FileConfiguration` and `BukkitScheduler` classes.
+Don't worry, the basic implementation is already done and should fit for most test cases, you just need to copy [this class](https://github.com/Alan-Gomes/mcspring-boot/blob/master/src/test/java/dev/alangomes/test/util/IntegrationTestUtil.java) into your project test files.
+
+After setting up the mocks, you can start writing tests using this structure:
+
+```java
+@RunWith(SpringRunner.class)
+@ContextConfiguration(
+        classes = MyApplication.class,
+        initializers = SpringSpigotTestInitializer.class
+)
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+public class SomeServiceTest {
+    
+    @Autowired
+    private SomeService someService;
+    
+    // your tests here
+    
+}
+```
+
+Like any traditional spring tests, you can inject and mock beans, as well as use any starters for testing. 

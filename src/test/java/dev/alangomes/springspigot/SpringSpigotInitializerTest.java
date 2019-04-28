@@ -1,15 +1,14 @@
 package dev.alangomes.springspigot;
 
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.Plugin;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
@@ -20,14 +19,13 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(JavaPlugin.class)
+@RunWith(MockitoJUnitRunner.class)
 public class SpringSpigotInitializerTest {
 
     private static final String PLUGIN_NAME = "TestPlugin";
 
     @Mock
-    private JavaPlugin plugin;
+    private Plugin plugin;
 
     @Mock
     private ConfigurableApplicationContext context;
@@ -56,7 +54,7 @@ public class SpringSpigotInitializerTest {
     public void shouldRegisterPluginConfigurationPropertySource() {
         initializer.initialize(context);
 
-        verify(propertySources).addFirst(any(ConfigurationPropertySource.class));
+        verify(propertySources).addLast(any(ConfigurationPropertySource.class));
     }
 
     @Test
@@ -64,14 +62,14 @@ public class SpringSpigotInitializerTest {
         initializer = new SpringSpigotInitializer(plugin, false);
         initializer.initialize(context);
 
-        verify(propertySources, never()).addFirst(any(ConfigurationPropertySource.class));
+        verify(propertySources, never()).addLast(any(ConfigurationPropertySource.class));
     }
 
     @Test
     public void shouldRegisterHookProperties() {
         initializer.initialize(context);
 
-        verify(propertySources).addLast(propertySourceCaptor.capture());
+        verify(propertySources, times(2)).addLast(propertySourceCaptor.capture());
 
         PropertiesPropertySource propertySource = propertySourceCaptor.getValue();
         Map<String, Object> props = propertySource.getSource();
