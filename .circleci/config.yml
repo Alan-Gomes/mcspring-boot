@@ -6,10 +6,10 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: spring-boot-starter-spigot-{{ checksum "pom.xml" }}
+          key: mcspring-{{ checksum "pom.xml" }}
       - run: mvn dependency:go-offline
       - save_cache:
           paths:
             - ~/.m2
-          key: spring-boot-starter-spigot-{{ checksum "pom.xml" }}
+          key: mcspring-{{ checksum "pom.xml" }}
       - run: mvn clean test jacoco:report coveralls:report -Dcoveralls.token=$COVERALLS_TOKEN
