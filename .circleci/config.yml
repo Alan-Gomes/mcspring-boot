@@ -18,6 +18,7 @@ jobs:
       - image: maven:3-jdk-8
     steps:
       - checkout
+      - run: export GPG_TTY=$(tty)
       - run: echo $GPG_SECRET_KEYS | base64 --decode | gpg --import --passphrase $GPG_PASSPHRASE
       - run: echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust
       - run: mvn --settings .maven.xml clean -Prelease deploy
