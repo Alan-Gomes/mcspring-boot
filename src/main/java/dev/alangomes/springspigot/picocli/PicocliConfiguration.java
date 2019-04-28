@@ -1,5 +1,6 @@
 package dev.alangomes.springspigot.picocli;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -18,9 +19,10 @@ import java.util.*;
  * Modified to support rebuild and to decouple from spring command line runner.
  * @see <a href="https://github.com/kakawait/picocli-spring-boot-starter">Spring boot Picocli starter</a>
  */
+@Slf4j
 @Configuration
 @Scope("singleton")
-public class PicocliConfiguration {
+class PicocliConfiguration {
 
     @Bean
     CommandLineDefinition picocliCommandLine(ApplicationContext applicationContext) {
@@ -117,6 +119,14 @@ public class PicocliConfiguration {
             String commandName = getCommandName(node.getClazz());
             if (StringUtils.isBlank(commandName)) {
                 continue;
+            }
+            Class<?> beanType = applicationContext.getType(node.getBeanName());
+            if (ClassUtils.isCglibProxyClass(beanType)) {
+                String className = ClassUtils.getQualifiedName(ClassUtils.getUserClass(beanType));
+                log.warn("The command class {} is a CGLIB proxy, which is not supported by the Picocli API.", className);
+                log.warn("This is usually caused by the use of @Authorize, @Audit or @Synchronize annotations " +
+                        "in methods inside command classes, these methods should be moved to another bean.");
+                log.warn("These annotations will have no effect.");
             }
             if (parents.containsKey(node.getParent())) {
                 current = parents.get(node.getParent());

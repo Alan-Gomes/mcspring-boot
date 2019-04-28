@@ -3,6 +3,7 @@ package dev.alangomes.test;
 import dev.alangomes.springspigot.command.CommandExecutor;
 import dev.alangomes.springspigot.command.CommandResult;
 import dev.alangomes.springspigot.context.Context;
+import dev.alangomes.springspigot.security.Audit;
 import dev.alangomes.test.util.SpringSpigotTestInitializer;
 import org.bukkit.entity.Player;
 import org.junit.Test;
@@ -82,6 +83,7 @@ public class CommandTest {
         private String parameter;
 
         @Override
+        @Audit
         public List<String> call() {
             return Arrays.asList("test", parameter);
         }
