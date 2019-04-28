@@ -264,7 +264,7 @@ This starter is designed to allow writing tests as easy as possible. Since Bukki
 still necessary to make some mocks in the server classes.
 
 First, you need to implement some mocks for the `Player`, `Server`, `FileConfiguration` and `BukkitScheduler` classes.
-Don't worry, the basic implementation is already done and should fit for most test cases, you just need to copy [this class](https://github.com/Alan-Gomes/mcspring-boot/blob/master/src/test/java/dev/alangomes/test/util/IntegrationTestUtil.java) into your project test files.
+Don't worry, the basic implementation is already done and should fit for most test cases, you just need to copy [this class](https://github.com/Alan-Gomes/mcspring-boot/blob/master/src/test/java/dev/alangomes/test/util/SpringSpigotTestInitializer.java) into your project test files.
 
 After setting up the mocks, you can start writing tests using this structure:
 
