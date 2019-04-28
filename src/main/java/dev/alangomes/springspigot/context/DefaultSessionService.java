@@ -78,7 +78,7 @@ public class DefaultSessionService implements SessionService, Listener {
 
     @Override
     public void clear() {
-        getSession().clear();
+        sessions.remove(context.getSenderId());
     }
 
     @Override
