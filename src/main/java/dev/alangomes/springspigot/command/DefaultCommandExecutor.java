@@ -10,11 +10,10 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -26,10 +25,10 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang.BooleanUtils.toBoolean;
 
-@Component
-@ConditionalOnClass(Bukkit.class)
-@Primary
 @Slf4j
+@Primary
+@Component
+@ConditionalOnBean(annotation = CommandLine.Command.class)
 public class DefaultCommandExecutor implements CommandExecutor {
 
     @Autowired

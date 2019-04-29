@@ -130,17 +130,6 @@ private Instance<Integer> commandDelay;
 
 You can also use Spring built-in `@Value` annotation, which works the same way, but doesn't support configuration reloading. 
 
-### Disabling support for configuration
-
-Sometimes you want to make a simple plugin without any configuration, if so, the starter will complain about the null config.
-To fix this you should pass a second `boolean` parameter to `SpringSpigotInitializer` during the [initialization](#initialization).
-If the parameter is `false`, it means that your plugin does not need this support and the starter will make no attempt
-to register it. Example:
-
-```java
-application.addInitializers(new SpringSpigotInitializer(this, false));
-```
-
 ## Securing methods
 
 > "I love writing authentication and authorization code." ~ No Developer Ever.

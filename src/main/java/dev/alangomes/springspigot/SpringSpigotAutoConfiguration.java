@@ -11,6 +11,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -21,6 +22,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.SchedulingConfiguration;
 
 @Configuration
 @ComponentScan("dev.alangomes.springspigot")
@@ -43,6 +45,7 @@ class SpringSpigotAutoConfiguration {
 
     @Bean
     @Scope("singleton")
+    @ConditionalOnBean(SchedulingConfiguration.class)
     public TaskScheduler taskScheduler(Plugin plugin, BukkitScheduler scheduler, @Value("${spigot.scheduler.poolSize:1}") int poolSize) {
         val taskScheduler = new SpigotScheduler(plugin, scheduler);
         taskScheduler.setPoolSize(poolSize);

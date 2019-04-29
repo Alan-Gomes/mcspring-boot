@@ -15,22 +15,14 @@ public class SpringSpigotInitializer implements
         ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private final Plugin plugin;
-    private final boolean configAvailable;
-
-    public SpringSpigotInitializer(Plugin plugin, boolean configAvailable) {
-        this.plugin = plugin;
-        this.configAvailable = configAvailable;
-    }
 
     public SpringSpigotInitializer(Plugin plugin) {
-        this(plugin, true);
+        this.plugin = plugin;
     }
 
     public void initialize(ConfigurableApplicationContext context) {
         val propertySources = context.getEnvironment().getPropertySources();
-        if (configAvailable) {
-            propertySources.addLast(new ConfigurationPropertySource(plugin.getConfig()));
-        }
+        propertySources.addLast(new ConfigurationPropertySource(plugin.getConfig()));
 
         val props = new Properties();
         props.put("spigot.plugin", plugin.getName());

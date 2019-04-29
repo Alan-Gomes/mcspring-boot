@@ -2,6 +2,7 @@ package dev.alangomes.test;
 
 import dev.alangomes.springspigot.context.Context;
 import dev.alangomes.springspigot.event.SpringEventExecutor;
+import dev.alangomes.springspigot.security.Audit;
 import dev.alangomes.test.util.SpringSpigotTestInitializer;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
@@ -62,6 +63,7 @@ public class ListenerTest {
     }
 
     @Component
+    @Audit
     static class TestListener implements Listener {
 
         @Autowired

@@ -2,17 +2,17 @@ package dev.alangomes.springspigot.command;
 
 import dev.alangomes.springspigot.context.Context;
 import lombok.val;
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
+import picocli.CommandLine;
 
 @Component
-@ConditionalOnClass(Bukkit.class)
+@ConditionalOnBean(annotation = CommandLine.Command.class)
 class CommandInterceptor implements Listener {
 
     @Autowired
