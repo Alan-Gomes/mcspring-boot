@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import picocli.CommandLine;
@@ -194,6 +195,7 @@ class PicocliConfiguration {
 
 }
 
+@Component
 @CommandLine.Command
 class BaseCommand implements Runnable {
 
