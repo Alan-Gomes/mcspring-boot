@@ -53,17 +53,17 @@ class SpringSpigotAutoConfiguration {
         return taskScheduler;
     }
 
-    @Bean
+    @Bean(destroyMethod = "")
     Server serverBean(Plugin plugin) {
         return plugin.getServer();
     }
 
-    @Bean
+    @Bean(destroyMethod = "")
     Plugin pluginBean(@Value("${spigot.plugin}") String pluginName) {
         return Bukkit.getPluginManager().getPlugin(pluginName);
     }
 
-    @Bean
+    @Bean(destroyMethod = "")
     BukkitScheduler schedulerBean(Server server) {
         return server.getScheduler();
     }
