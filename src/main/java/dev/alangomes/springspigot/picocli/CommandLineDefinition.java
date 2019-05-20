@@ -6,10 +6,14 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import picocli.CommandLine;
+import picocli.CommandLine.IHelpSectionRenderer;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Getter
 public class CommandLineDefinition {
@@ -42,6 +46,8 @@ public class CommandLineDefinition {
                 commandLine.addSubcommand(key, value);
             }
         });
+
+        overrideHelpRenderers(commandLine);
         return commandLine;
     }
 
@@ -56,6 +62,18 @@ public class CommandLineDefinition {
 
     public Set<String> getCommandNames() {
         return Collections.unmodifiableSet(subcommands.keySet());
+    }
+
+    private void overrideHelpRenderers(CommandLine commandLine) {
+        Map<String, IHelpSectionRenderer> renderers = commandLine.getHelpSectionMap().keySet()
+                .stream()
+                .collect(Collectors.toMap(Function.identity(), (k) -> overrideRenderer(commandLine.getHelpSectionMap().get(k))));
+        commandLine.setHelpSectionMap(renderers);
+    }
+
+    private IHelpSectionRenderer overrideRenderer(IHelpSectionRenderer renderer) {
+        // strip carriage returns when running inside a windows server
+        return (h) -> renderer.render(h).replaceAll("\\r", "");
     }
 
 }
