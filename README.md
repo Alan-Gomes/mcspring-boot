@@ -116,6 +116,66 @@ public class HealCommand implements Runnable {
 
 In addition, you can also inject the `Plugin` and `Server` instances via `@Autowired`
 
+### Working with subcommands
+
+Sometimes your command gets too complex and need to be splitted in subcommands. The Picocli API already supports
+subcommands using two different ways:
+
+The first and easiest way is to create subcommands with nested classes:
+
+```java
+@Component
+@CommandLine.Command(name = "money")
+public class MoneyCommand {
+
+    @Component
+    @CommandLine.Command(name = "add")
+    public class AddCommand implements Runnable {
+
+        @Autowired
+        private Context context;
+
+        @Override
+        public void run() {
+            context.getSender().sendMessage("test");
+        }
+    }
+}
+```
+
+The second and most *clean* way is to use *annotated subcommands*, which allows you to create each subcommand in a completely
+separate class. To do this, you need to create the subcommand class with the `@Subcommand` annotation instead:
+
+```java
+@Subcommand
+@CommandLine.Command(name = "add")
+public class MoneyAddCommand implements Runnable {
+
+    @Autowired
+    private Context context;
+
+    @Override
+    public void run() {
+        context.getSender().sendMessage("test");
+    }
+}
+```
+
+After that, you can add a reference to the subcommand inside the **root** command, just like this:
+
+```java
+@Component
+@CommandLine.Command(
+        name = "money",
+        subcommands = {MoneyAddCommand.class}
+)
+public class MoneyCommand {
+
+    // some code
+    
+}
+```
+
 ## Retrieving configuration
 
 Is really easy to retrieve configuration properties, you can use the `@DynamicValue` annotation, it will automatically
