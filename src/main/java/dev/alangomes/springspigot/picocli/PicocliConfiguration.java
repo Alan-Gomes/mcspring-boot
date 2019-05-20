@@ -1,11 +1,14 @@
 package dev.alangomes.springspigot.picocli;
 
+import dev.alangomes.springspigot.command.Subcommand;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -13,6 +16,7 @@ import picocli.CommandLine;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Thibaud Leprêtre
@@ -26,14 +30,21 @@ import java.util.*;
 class PicocliConfiguration {
 
     @Bean
-    CommandLineDefinition picocliCommandLine(ApplicationContext applicationContext) {
-        List<String> commands = new ArrayList<>(Arrays.asList(applicationContext.getBeanNamesForAnnotation(CommandLine.Command.class)));
+    CommandLineDefinition picocliCommandLine(ApplicationContext applicationContext, CommandLine.IFactory factory) {
+        List<String> commands = Arrays.stream(applicationContext.getBeanNamesForAnnotation(CommandLine.Command.class))
+                .filter(name -> !isSubcommand(applicationContext, name))
+                .collect(Collectors.toList());
         List<String> mainCommands = getMainCommands(commands, applicationContext);
         Object mainCommand = mainCommands.isEmpty() ? new BaseCommand() : mainCommands.get(0);
         commands.removeAll(mainCommands);
-        CommandLineDefinition cli = new CommandLineDefinition(mainCommand);
-        registerCommands(cli, commands, applicationContext);
+        CommandLineDefinition cli = new CommandLineDefinition(mainCommand, factory);
+        registerCommands(cli, commands, applicationContext, factory);
         return cli;
+    }
+
+    private boolean isSubcommand(BeanFactory beanFactory, String beanName) {
+        Class<?> type = getType(beanFactory, beanName);
+        return AnnotationUtils.findAnnotation(type, Subcommand.class) != null;
     }
 
     private String getCommandName(String command, ApplicationContext applicationContext) {
@@ -107,7 +118,7 @@ class PicocliConfiguration {
         return tree;
     }
 
-    private void registerCommands(CommandLineDefinition cli, Collection<String> commands, ApplicationContext applicationContext) {
+    private void registerCommands(CommandLineDefinition cli, Collection<String> commands, ApplicationContext applicationContext, CommandLine.IFactory factory) {
         CommandLineDefinition current = cli;
         Map<Class<?>, CommandLineDefinition> parents = new HashMap<>();
         for (Map.Entry<Node, List<String>> entry : findCommands(commands, applicationContext).entrySet()) {
@@ -137,10 +148,10 @@ class PicocliConfiguration {
             if (children.isEmpty()) {
                 current.addSubcommand(commandName, command);
             } else {
-                CommandLineDefinition sub = new CommandLineDefinition(command);
+                CommandLineDefinition sub = new CommandLineDefinition(command, factory);
                 current.addSubcommand(commandName, sub);
                 for (String child : children) {
-                    sub.addSubcommand(getCommandName(child, applicationContext), new CommandLineDefinition(child));
+                    sub.addSubcommand(getCommandName(child, applicationContext), new CommandLineDefinition(child, factory));
                 }
                 current = sub;
             }
@@ -148,8 +159,8 @@ class PicocliConfiguration {
         }
     }
 
-    private Class<?> getType(ApplicationContext context, String beanName) {
-        return ClassUtils.getUserClass(context.getType(beanName));
+    private Class<?> getType(BeanFactory beanFactory, String beanName) {
+        return ClassUtils.getUserClass(beanFactory.getType(beanName));
     }
 
     private static class Node {

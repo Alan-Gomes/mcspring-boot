@@ -2,6 +2,7 @@ package dev.alangomes.test;
 
 import dev.alangomes.springspigot.command.CommandExecutor;
 import dev.alangomes.springspigot.command.CommandResult;
+import dev.alangomes.springspigot.command.Subcommand;
 import dev.alangomes.springspigot.context.Context;
 import dev.alangomes.springspigot.security.Audit;
 import dev.alangomes.test.util.SpringSpigotTestInitializer;
@@ -22,10 +23,11 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(
-        classes = {TestApplication.class, CommandTest.TestCommand.class, CommandTest.MoneyCommand.class},
+        classes = {TestApplication.class, CommandTest.TestCommand.class, CommandTest.MoneyCommand.class, CommandTest.MoneyWithdrawCommand.class},
         initializers = SpringSpigotTestInitializer.class
 )
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
@@ -75,6 +77,28 @@ public class CommandTest {
         assertEquals("test", messages.get(1));
     }
 
+    @Test
+    public void shouldNotRegisterIdependentSubcommand() {
+        CommandResult result = context.runWithSender(player, () -> executor.execute("withdraw", "test"));
+
+        assertFalse(result.isExists());
+    }
+
+    @Test
+    public void shouldExecuteIdependentSubcommandCorrectly() {
+        when(player.getName()).thenReturn("playername");
+
+        CommandResult result = context.runWithSender(player, () -> executor.execute("money", "withdraw", "test"));
+
+        assertTrue(result.isExists());
+        assertFalse(result.isErrored());
+        List<String> messages = result.getOutput();
+        assertEquals(3, messages.size());
+        assertEquals("withdraw", messages.get(0));
+        assertEquals("test", messages.get(1));
+        assertEquals("playername", messages.get(2));
+    }
+
     @Component
     @CommandLine.Command(name = "test")
     static class TestCommand implements Callable<List<String>> {
@@ -90,7 +114,10 @@ public class CommandTest {
     }
 
     @Component
-    @CommandLine.Command(name = "money")
+    @CommandLine.Command(
+            name = "money",
+            subcommands = {MoneyWithdrawCommand.class}
+    )
     static class MoneyCommand implements Callable<String> {
 
         @Override
@@ -111,6 +138,22 @@ public class CommandTest {
             }
         }
 
+    }
+
+    @Subcommand
+    @CommandLine.Command(name = "withdraw")
+    static class MoneyWithdrawCommand implements Callable<List<String>> {
+
+        @CommandLine.Parameters(index = "0", defaultValue = "world")
+        private String parameter;
+
+        @Autowired
+        private Context context;
+
+        @Override
+        public List<String> call() {
+            return Arrays.asList("withdraw", parameter, context.getSender().getName());
+        }
     }
 
 }

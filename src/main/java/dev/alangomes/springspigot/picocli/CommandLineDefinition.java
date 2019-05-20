@@ -16,12 +16,14 @@ public class CommandLineDefinition {
 
     private final String beanName;
     private final Object instance;
+    private final CommandLine.IFactory commandFactory;
 
     private final HashMap<String, Object> subcommands = new HashMap<>();
 
-    CommandLineDefinition(Object instance) {
+    CommandLineDefinition(Object instance, CommandLine.IFactory factory) {
         this.beanName = instance instanceof String ? (String) instance : null;
         this.instance = !(instance instanceof String) ? instance : null;
+        this.commandFactory = factory;
     }
 
     void addSubcommand(String name, Object commandLine) {
@@ -29,7 +31,7 @@ public class CommandLineDefinition {
     }
 
     public CommandLine build(BeanFactory factory) {
-        CommandLine commandLine = new CommandLine(beanName != null ? getBean(factory, beanName) : instance);
+        CommandLine commandLine = new CommandLine(beanName != null ? getBean(factory, beanName) : instance, commandFactory);
         subcommands.forEach((key, value) -> {
             if (value instanceof CommandLineDefinition) {
                 commandLine.addSubcommand(key, ((CommandLineDefinition) value).build(factory));
