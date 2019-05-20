@@ -81,6 +81,9 @@ public class DefaultCommandExecutor implements CommandExecutor {
                 output.addAll(buildOutput(result));
             }
             return new CommandResult(output);
+        } catch (CommandLine.InitializationException ex) {
+            log.error("Unexpected exception during command initialization", ex);
+            return CommandResult.unknown();
         } catch (CommandLine.UnmatchedArgumentException ignored) {
         } catch (CommandLine.MissingParameterException ex) {
             val message = String.format(missingParameterErrorMessage.get(), ex.getMissing().get(0).paramLabel());

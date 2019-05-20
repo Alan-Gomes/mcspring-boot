@@ -32,6 +32,7 @@ public class CommandLineDefinition {
 
     public CommandLine build(BeanFactory factory) {
         CommandLine commandLine = new CommandLine(beanName != null ? getBean(factory, beanName) : instance, commandFactory);
+
         subcommands.forEach((key, value) -> {
             if (value instanceof CommandLineDefinition) {
                 commandLine.addSubcommand(key, ((CommandLineDefinition) value).build(factory));
