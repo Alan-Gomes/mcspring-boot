@@ -14,8 +14,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
+
 @Component
-@Scope("singleton")
+@Scope(SCOPE_SINGLETON)
 public class DefaultSessionService implements SessionService, Listener {
 
     @Autowired

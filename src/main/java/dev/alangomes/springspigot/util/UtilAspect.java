@@ -11,10 +11,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
+
 @Slf4j
 @Aspect
 @Component
-@Scope("singleton")
+@Scope(SCOPE_SINGLETON)
 class UtilAspect {
 
     @Autowired

@@ -14,8 +14,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
+
 @Component
-@Scope("singleton")
+@Scope(SCOPE_SINGLETON)
 public class Context {
 
     @Autowired

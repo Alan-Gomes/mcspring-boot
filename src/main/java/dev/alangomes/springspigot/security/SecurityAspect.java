@@ -27,11 +27,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static jdk.nashorn.internal.runtime.JSType.toBoolean;
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
 
 @Slf4j
 @Aspect
 @Component
-@Scope("singleton")
+@Scope(SCOPE_SINGLETON)
 class SecurityAspect {
 
     @Autowired

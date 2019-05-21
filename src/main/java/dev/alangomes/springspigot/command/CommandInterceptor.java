@@ -21,9 +21,12 @@ class CommandInterceptor implements Listener {
     @Autowired
     private CommandExecutor commandExecutor;
 
+    @Autowired
+    private CommandService commandService;
+
     @EventHandler
     void onPlayerCommand(PlayerCommandPreprocessEvent event) {
-        if (event.isCancelled()) return;
+        if (event.isCancelled() || commandService.isRegistered()) return;
         val player = context.getPlayer();
         val result = commandExecutor.execute(event.getMessage().substring(1).split(" "));
         event.setCancelled(result.isExists());
@@ -32,7 +35,7 @@ class CommandInterceptor implements Listener {
 
     @EventHandler
     void onServerCommand(ServerCommandEvent event) {
-        if (event.isCancelled()) return;
+        if (event.isCancelled() || commandService.isRegistered()) return;
         val sender = context.getSender();
         val result = commandExecutor.execute(event.getCommand().split(" "));
         event.setCancelled(result.isExists());

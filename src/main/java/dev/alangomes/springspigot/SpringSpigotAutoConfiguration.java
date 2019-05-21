@@ -24,6 +24,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.SchedulingConfiguration;
 
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
+
 @Configuration
 @ComponentScan("dev.alangomes.springspigot")
 @ConditionalOnClass({Bukkit.class})
@@ -44,7 +46,7 @@ class SpringSpigotAutoConfiguration {
     }
 
     @Bean
-    @Scope("singleton")
+    @Scope(SCOPE_SINGLETON)
     @ConditionalOnBean(SchedulingConfiguration.class)
     public TaskScheduler taskScheduler(Plugin plugin, BukkitScheduler scheduler, @Value("${spigot.scheduler.poolSize:1}") int poolSize) {
         val taskScheduler = new SpigotScheduler(plugin, scheduler);

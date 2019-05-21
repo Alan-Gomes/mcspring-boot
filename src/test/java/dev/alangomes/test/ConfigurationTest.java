@@ -53,6 +53,24 @@ public class ConfigurationTest {
     }
 
     @Test
+    public void shouldRetrieveDefaultValueSupplied() {
+        when(configuration.get("command.message")).thenReturn(null);
+
+        String message = commandMessage.orElse("default value");
+
+        assertEquals("default value", message);
+    }
+
+    @Test
+    public void shouldRetrieveDefaultValueFromSupplier() {
+        when(configuration.get("command.message")).thenReturn(null);
+
+        String message = commandMessage.orElseGet(() -> "default value");
+
+        assertEquals("default value", message);
+    }
+
+    @Test
     public void shouldReevaluateConfigurationOnEachCall() {
         when(configuration.get("command.message")).thenReturn("test message");
 

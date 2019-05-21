@@ -9,7 +9,7 @@
     <groupId>dev.alangomes</groupId>
     <artifactId>spigot-spring-boot-starter</artifactId>
     <packaging>jar</packaging>
-    <version>0.11.1</version>
+    <version>0.12.0</version>
     <description>Spring support for spigot plugins</description>
     <url>https://github.com/Alan-Gomes/mcspring-boot</url>
 
@@ -145,6 +145,7 @@
                 <configuration>
                     <excludes>
                         <exclude>**/Wrapped*.java</exclude>
+                        <exclude>**/CommandService.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>

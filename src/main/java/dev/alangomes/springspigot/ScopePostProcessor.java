@@ -8,6 +8,8 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 import java.util.Arrays;
 
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
+
 class ScopePostProcessor implements BeanFactoryPostProcessor {
 
     @Override
@@ -16,7 +18,7 @@ class ScopePostProcessor implements BeanFactoryPostProcessor {
             val beanDef = factory.getBeanDefinition(beanName);
             val beanType = factory.getType(beanName);
             if (beanType != null && beanType.isAssignableFrom(Listener.class)) {
-                beanDef.setScope("singleton");
+                beanDef.setScope(SCOPE_SINGLETON);
             }
         });
     }

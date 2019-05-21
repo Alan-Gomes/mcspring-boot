@@ -6,6 +6,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.env.Environment;
 
+import java.util.function.Supplier;
+
 /**
  * Class that represents a dynamic property
  */
@@ -27,6 +29,32 @@ public class Instance<T> {
      * @return The value of the property
      */
     public T get() {
-        return conversionService.convert(environment.resolvePlaceholders(expression), type);
+        try {
+            return conversionService.convert(environment.resolveRequiredPlaceholders(expression), type);
+        } catch (IllegalArgumentException exception) {
+            return null;
+        }
+    }
+
+    /*
+     * Evaluate and retrieve the value of the property if not {@code null}, otherwise return {@param defaultValue}
+     *
+     * @param defaultValue the default value to be returned if the property is {@code null}
+     * @return The value of the property if not {@code null}, {@param defaultValue} otherwise
+     */
+    public T orElse(T defaultValue) {
+        T value = get();
+        return value != null ? value : defaultValue;
+    }
+
+    /*
+     * Evaluate and retrieve the value of the property if not {@code null}, otherwise return the value supplied from {@param valueSupplier}
+     *
+     * @param valueSupplier a supplier for the default value to be returned if the property is {@code null}
+     * @return The value of the property if not {@code null}, otherwise the value supplied from {@param valueSupplier}
+     */
+    public T orElseGet(Supplier<? extends T> valueSupplier) {
+        T value = get();
+        return value != null ? value : valueSupplier.get();
     }
 }

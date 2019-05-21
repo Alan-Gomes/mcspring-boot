@@ -10,10 +10,12 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.env.Environment;
 
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+
 @Configuration
 class ResourceConfiguration {
 
-    @Scope("prototype")
+    @Scope(SCOPE_PROTOTYPE)
     @Bean
     public Instance configInstance(InjectionPoint injectionPoint, ConversionService conversionService, Environment environment) {
         val dynamicValue = injectionPoint.getAnnotation(DynamicValue.class);

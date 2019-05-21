@@ -18,6 +18,8 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
+
 /**
  * @author Thibaud Leprêtre
  * <p>
@@ -26,7 +28,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Configuration
-@Scope("singleton")
+@Scope(SCOPE_SINGLETON)
 class PicocliConfiguration {
 
     @Bean

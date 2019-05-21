@@ -13,6 +13,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ScopePostProcessorTest {
@@ -43,7 +44,7 @@ public class ScopePostProcessorTest {
     public void shouldSetSingletonScopeToListeners() {
         scopePostProcessor.postProcessBeanFactory(factory);
 
-        verify(bean1).setScope("singleton");
+        verify(bean1).setScope(SCOPE_SINGLETON);
         verify(bean2, never()).setScope(any());
         verify(bean3, never()).setScope(any());
     }
