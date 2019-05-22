@@ -26,7 +26,10 @@ class UtilAspect {
     private Server server;
 
     @Order(0)
-    @Around("@annotation(dev.alangomes.springspigot.util.Synchronize) || @within(dev.alangomes.springspigot.util.Synchronize)")
+    @Around("within(@(@dev.alangomes.springspigot.util.Synchronize *) *) " +
+            "|| execution(@(@dev.alangomes.springspigot.util.Synchronize *) * *(..)) " +
+            "|| @within(dev.alangomes.springspigot.util.Synchronize)" +
+            "|| execution(@dev.alangomes.springspigot.util.Synchronize * *(..))")
     public Object synchronizeCall(ProceedingJoinPoint joinPoint) throws Throwable {
         if (server.isPrimaryThread()) {
             return joinPoint.proceed();

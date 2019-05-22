@@ -1,12 +1,14 @@
 package dev.alangomes.test;
 
 import dev.alangomes.springspigot.context.Context;
+import dev.alangomes.springspigot.context.SessionService;
 import dev.alangomes.springspigot.exception.PermissionDeniedException;
 import dev.alangomes.springspigot.exception.PlayerNotFoundException;
 import dev.alangomes.springspigot.security.Audit;
 import dev.alangomes.springspigot.security.Authorize;
 import dev.alangomes.test.util.SpringSpigotTestInitializer;
 import org.bukkit.entity.Player;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -35,8 +37,16 @@ public class SecurityTest {
     @Autowired
     private Context context;
 
+    @Autowired
+    private SessionService sessionService;
+
     @Mock
     private Player player;
+
+    @Before
+    public void setup() {
+        when(player.getName()).thenReturn("test_player");
+    }
 
     @Test(expected = PlayerNotFoundException.class)
     public void shouldThrowExceptionIfNoPlayerInContext() {
@@ -75,6 +85,14 @@ public class SecurityTest {
         assertEquals("The call was not successful", 10, result);
     }
 
+    @Test
+    public void shouldProvideSessionAccess() {
+        context.runWithSender(player, () -> {
+            sessionService.current().put("test key", 2);
+            testService.assertTwo("test key");
+        });
+    }
+
     @Service
     static class TestService {
         @Audit(senderOnly = false)
@@ -87,6 +105,11 @@ public class SecurityTest {
         @Authorize("hasPermission('resource.' + #arg0 + '.create')")
         public String create(String resourceName) {
             return resourceName;
+        }
+
+        @Authorize("#session[#arg0] == 2")
+        public void assertTwo(String key) {
+
         }
 
         public int multiply(int num1, int num2) {
