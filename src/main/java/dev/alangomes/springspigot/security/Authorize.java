@@ -25,4 +25,10 @@ public @interface Authorize {
      */
     String value();
 
+    /**
+     * The message to be thrown in {@link dev.alangomes.springspigot.exception.PermissionDeniedException PermissionDeniedException}
+     * if the expression evaluates to {@code false}
+     */
+    String message() default "";
+
 }

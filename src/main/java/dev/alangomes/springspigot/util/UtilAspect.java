@@ -1,6 +1,6 @@
 package dev.alangomes.springspigot.util;
 
-import dev.alangomes.springspigot.util.scheduler.Scheduler;
+import dev.alangomes.springspigot.util.scheduler.SchedulerService;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -20,7 +20,7 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 class UtilAspect {
 
     @Autowired
-    private Scheduler scheduler;
+    private SchedulerService schedulerService;
 
     @Autowired
     private Server server;
@@ -34,7 +34,7 @@ class UtilAspect {
         if (server.isPrimaryThread()) {
             return joinPoint.proceed();
         }
-        scheduler.scheduleSyncDelayedTask(() -> {
+        schedulerService.scheduleSyncDelayedTask(() -> {
             try {
                 joinPoint.proceed();
             } catch (Throwable throwable) {

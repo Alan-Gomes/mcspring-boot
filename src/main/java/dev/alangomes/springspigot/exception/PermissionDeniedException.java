@@ -8,8 +8,8 @@ public class PermissionDeniedException extends CommandException {
 
     private final String permission;
 
-    public PermissionDeniedException(String permission) {
-        super("Sender didn't satisfied the condition: " + permission);
+    public PermissionDeniedException(String permission, String message) {
+        super(message != null ? message : "Sender didn't satisfied the condition: " + permission);
         this.permission = permission;
     }
 }

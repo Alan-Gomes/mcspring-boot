@@ -67,6 +67,10 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+        <repository>
+            <id>vault-repo</id>
+            <url>http://nexus.hc.to/content/repositories/pub_releases</url>
+        </repository>
     </repositories>
 
     <dependencyManagement>
@@ -112,6 +116,13 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.9</version>
         </dependency>
+        <dependency>
+            <groupId>net.milkbowl.vault</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>1.7</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -146,6 +157,7 @@
                     <excludes>
                         <exclude>**/Wrapped*.java</exclude>
                         <exclude>**/CommandService.java</exclude>
+                        <exclude>src/main/java/dev/alangomes/springspigot/extensions/**/*Impl.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>

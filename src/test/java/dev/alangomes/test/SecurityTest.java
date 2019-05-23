@@ -6,6 +6,7 @@ import dev.alangomes.springspigot.exception.PermissionDeniedException;
 import dev.alangomes.springspigot.exception.PlayerNotFoundException;
 import dev.alangomes.springspigot.security.Audit;
 import dev.alangomes.springspigot.security.Authorize;
+import dev.alangomes.springspigot.security.GuardService;
 import dev.alangomes.test.util.SpringSpigotTestInitializer;
 import org.bukkit.entity.Player;
 import org.junit.Before;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(
-        classes = {TestApplication.class, SecurityTest.TestService.class},
+        classes = {TestApplication.class, SecurityTest.TestService.class, SecurityTest.GuardServiceImpl.class},
         initializers = SpringSpigotTestInitializer.class
 )
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
@@ -85,6 +86,25 @@ public class SecurityTest {
         assertEquals("The call was not successful", 10, result);
     }
 
+    @Test(expected = PermissionDeniedException.class)
+    public void shouldCallGuardMethod() {
+        when(player.hasPermission("test.admin")).thenReturn(false);
+
+        context.runWithSender(player, () -> testService.testGuard());
+    }
+
+    @Test(expected = PermissionDeniedException.class)
+    public void shouldThrowExceptionWithCustomMessageIfPermissionWasDenied() {
+        when(player.hasPermission("server.shutdown")).thenReturn(false);
+
+        try {
+            context.runWithSender(player, () -> testService.testMessage());
+        } catch (PermissionDeniedException exception) {
+            assertEquals("You cannot shutdown the server!", exception.getMessage());
+            throw exception;
+        }
+    }
+
     @Test
     public void shouldProvideSessionAccess() {
         context.runWithSender(player, () -> {
@@ -112,8 +132,28 @@ public class SecurityTest {
 
         }
 
+        @Authorize("#guard.isAdmin()")
+        public void testGuard() {
+
+        }
+
+        @Authorize(value = "hasPermission('server.shutdown')", message = "    You cannot shutdown the server!   ")
+        public void testMessage() {
+
+        }
+
         public int multiply(int num1, int num2) {
             return num1 * num2;
+        }
+    }
+
+    @Service
+    static class GuardServiceImpl implements GuardService {
+        @Autowired
+        private Context context;
+
+        public boolean isAdmin() {
+            return context.getSender().hasPermission("test.admin");
         }
     }
 

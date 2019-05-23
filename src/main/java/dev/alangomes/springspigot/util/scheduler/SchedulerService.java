@@ -3,11 +3,8 @@ package dev.alangomes.springspigot.util.scheduler;
 /**
  * Wrapper around {@link org.bukkit.scheduler.BukkitScheduler BukkitScheduler} to remove the need of the plugin reference
  * as well as keep the context during the tasks.
- *
- * @deprecated You should use {@link dev.alangomes.springspigot.util.scheduler.SchedulerService SchedulerService}
  */
-@Deprecated
-public interface Scheduler {
+public interface SchedulerService {
     /**
      * Schedules a once off task to occur after a delay.
      * <p>
@@ -16,9 +13,7 @@ public interface Scheduler {
      * @param task  Task to be executed
      * @param delay Delay in server ticks before executing task
      * @return Task id number (-1 if scheduling failed)
-     * @deprecated You should use {@link dev.alangomes.springspigot.util.scheduler.SchedulerService#scheduleSyncDelayedTask(Runnable task, long delay)}
      */
-    @Deprecated
     int scheduleSyncDelayedTask(Runnable task, long delay);
 
     /**
@@ -28,9 +23,7 @@ public interface Scheduler {
      *
      * @param task Task to be executed
      * @return Task id number (-1 if scheduling failed)
-     * @deprecated You should use {@link dev.alangomes.springspigot.util.scheduler.SchedulerService#scheduleSyncDelayedTask(Runnable task)}
      */
-    @Deprecated
     int scheduleSyncDelayedTask(Runnable task);
 
     /**
@@ -42,18 +35,14 @@ public interface Scheduler {
      * @param delay  Delay in server ticks before executing first repeat
      * @param period Period in server ticks of the task
      * @return Task id number (-1 if scheduling failed)
-     * @deprecated You should use {@link dev.alangomes.springspigot.util.scheduler.SchedulerService#scheduleSyncRepeatingTask(Runnable task, long delay, long period)}
      */
-    @Deprecated
     int scheduleSyncRepeatingTask(Runnable task, long delay, long period);
 
     /**
      * Removes task from scheduler.
      *
      * @param taskId Id number of task to be removed
-     * @deprecated You should use {@link dev.alangomes.springspigot.util.scheduler.SchedulerService#cancelTask(int taskId)}
      */
-    @Deprecated
     void cancelTask(int taskId);
 
     /**
@@ -67,10 +56,9 @@ public interface Scheduler {
      * thread is alive.
      *
      * @param taskId The task to check.
+     *               <p>
      * @return If the task is currently running.
-     * @deprecated You should use {@link dev.alangomes.springspigot.util.scheduler.SchedulerService#isCurrentlyRunning(int taskId)}
      */
-    @Deprecated
     boolean isCurrentlyRunning(int taskId);
 
     /**
@@ -81,9 +69,8 @@ public interface Scheduler {
      * will not be queued again.
      *
      * @param taskId The task to check.
+     *               <p>
      * @return If the task is queued to be run.
-     * @deprecated You should use {@link dev.alangomes.springspigot.util.scheduler.SchedulerService#isQueued(int taskId)}
      */
-    @Deprecated
     boolean isQueued(int taskId);
 }

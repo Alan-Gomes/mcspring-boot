@@ -4,15 +4,17 @@ import dev.alangomes.springspigot.context.Context;
 import dev.alangomes.springspigot.context.SessionService;
 import dev.alangomes.springspigot.exception.PermissionDeniedException;
 import dev.alangomes.springspigot.exception.PlayerNotFoundException;
-import dev.alangomes.springspigot.util.AopAnnotationUtil;
+import dev.alangomes.springspigot.util.AopAnnotationUtils;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.bukkit.ChatColor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
@@ -44,6 +46,9 @@ class SecurityAspect {
     @Autowired
     private SessionService sessionService;
 
+    @Autowired(required = false)
+    private GuardService guardService;
+
     private final Map<String, Expression> expressionCache = new ConcurrentHashMap<>();
 
     private final ExpressionParser parser = new SpelExpressionParser();
@@ -64,12 +69,14 @@ class SecurityAspect {
         IntStream.range(0, parameters.length)
                 .forEach(i -> senderContext.setVariable(parameters[i].getName(), joinPoint.getArgs()[i]));
         senderContext.setVariable("session", sessionService.current());
+        senderContext.setVariable("guard", guardService);
 
-        AopAnnotationUtil.getAppliableAnnotations(method, Authorize.class).forEach(authorize -> {
+        AopAnnotationUtils.getAppliableAnnotations(method, Authorize.class).forEach(authorize -> {
             val expressionSource = authorize.value();
             val expression = expressionCache.computeIfAbsent(expressionSource, parser::parseExpression);
             if (!toBoolean(expression.getValue(senderContext, Boolean.class))) {
-                throw new PermissionDeniedException(expressionSource);
+                val message = StringUtils.trimToNull(ChatColor.translateAlternateColorCodes('&', authorize.message()));
+                throw new PermissionDeniedException(expressionSource, message);
             }
         });
         return joinPoint.proceed();
@@ -86,15 +93,16 @@ class SecurityAspect {
         val signature = ClassUtils.getUserClass(method.getDeclaringClass()).getName() + "." + method.getName();
         val arguments = Arrays.stream(joinPoint.getArgs()).map(String::valueOf).collect(Collectors.joining(", "));
 
-        AopAnnotationUtil.getAppliableAnnotations(method, Audit.class).forEach(audit -> {
-            if (sender != null || !audit.senderOnly()) {
-                if (sender != null) {
-                    log.info(String.format("Player %s invoked %s(%s)", sender.getName(), signature, arguments));
-                } else {
-                    log.info(String.format("Server invoked %s(%s)", signature, arguments));
-                }
-            }
-        });
+        AopAnnotationUtils.getAppliableAnnotations(method, Audit.class)
+                .filter(audit -> sender != null || !audit.senderOnly())
+                .limit(1)
+                .forEach(audit -> {
+                    if (sender != null) {
+                        log.info(String.format("Player %s invoked %s(%s)", sender.getName(), signature, arguments));
+                    } else {
+                        log.info(String.format("Server invoked %s(%s)", signature, arguments));
+                    }
+                });
     }
 
 }
