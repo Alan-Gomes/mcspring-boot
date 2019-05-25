@@ -157,6 +157,7 @@
                     <excludes>
                         <exclude>**/Wrapped*.java</exclude>
                         <exclude>**/CommandService.java</exclude>
+                        <exclude>src/main/java/dev/alangomes/springspigot/scope/NullSender.java</exclude>
                         <exclude>src/main/java/dev/alangomes/springspigot/extensions/**/*Impl.java</exclude>
                     </excludes>
                 </configuration>
