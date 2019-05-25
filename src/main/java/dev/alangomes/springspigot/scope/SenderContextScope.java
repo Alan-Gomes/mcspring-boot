@@ -2,10 +2,10 @@ package dev.alangomes.springspigot.scope;
 
 import dev.alangomes.springspigot.context.Context;
 import lombok.val;
-import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.permissions.Permissible;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.stereotype.Component;
@@ -21,9 +21,9 @@ public class SenderContextScope implements Scope, Listener {
 
     private static final NullSender NULL_SENDER = new NullSender();
 
-    private final Map<CommandSender, Map<String, Object>> senderScope = new ConcurrentHashMap<>();
+    private final Map<Permissible, Map<String, Object>> senderScope = new ConcurrentHashMap<>();
 
-    private final Map<CommandSender, Map<String, Runnable>> destructionCallbacks = new ConcurrentHashMap<>();
+    private final Map<Permissible, Map<String, Runnable>> destructionCallbacks = new ConcurrentHashMap<>();
 
     @Override
     public Object get(String name, ObjectFactory<?> objectFactory) {
@@ -69,7 +69,7 @@ public class SenderContextScope implements Scope, Listener {
         return destructionCallbacks.computeIfAbsent(sender, (s) -> new ConcurrentHashMap<>());
     }
 
-    private CommandSender getCurrentSender() {
+    private Permissible getCurrentSender() {
         val sender = Context.getInstance().getSender();
         return sender != null ? sender : NULL_SENDER;
     }
