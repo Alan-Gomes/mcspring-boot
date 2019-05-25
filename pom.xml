@@ -158,6 +158,7 @@
                         <exclude>**/Wrapped*.java</exclude>
                         <exclude>**/CommandService.java</exclude>
                         <exclude>src/main/java/dev/alangomes/springspigot/extensions/**/*Impl.java</exclude>
+                        <exclude>src/main/java/dev/alangomes/springspigot/scope/NullSender.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -178,6 +179,19 @@
                                 <id>attach-sources</id>
                                 <goals>
                                     <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
                                 </goals>
                             </execution>
                         </executions>
