@@ -20,6 +20,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <coveralls.token>null</coveralls.token>
+        <delombok.output>target/delombok</delombok.output>
     </properties>
 
     <licenses>
@@ -171,6 +172,24 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok-maven-plugin</artifactId>
+                        <version>1.18.0.0</version>
+                        <configuration>
+                            <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+                            <outputDirectory>${delombok.output}</outputDirectory>
+                            <addOutputDirectory>false</addOutputDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>delombok</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
                         <version>3.0.1</version>
@@ -189,8 +208,10 @@
                         <version>3.0.0</version>
                         <configuration>
                             <sourceFileExcludes>
-                                <sourceFileExclude>src/main/java/dev/alangomes/springspigot/scope/NullSender.java</sourceFileExclude>
+                                <sourceFileExclude>src/main/java/dev/alangomes/springspigot/scope/NullSender.java
+                                </sourceFileExclude>
                             </sourceFileExcludes>
+                            <sourcepath>${delombok.output}</sourcepath>
                         </configuration>
                         <executions>
                             <execution>
