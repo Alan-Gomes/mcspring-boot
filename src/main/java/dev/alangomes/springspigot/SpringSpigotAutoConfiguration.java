@@ -1,6 +1,7 @@
 package dev.alangomes.springspigot;
 
 import dev.alangomes.springspigot.event.EventService;
+import dev.alangomes.springspigot.scope.SenderContextScope;
 import dev.alangomes.springspigot.util.scheduler.SpigotScheduler;
 import lombok.val;
 import org.bukkit.Bukkit;
@@ -13,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -71,8 +71,7 @@ class SpringSpigotAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public static BeanFactoryPostProcessor scopeBeanFactoryPostProcessor() {
-        return new ScopePostProcessor();
+    public static BeanFactoryPostProcessor scopeBeanFactoryPostProcessor(SenderContextScope scope) {
+        return new ScopePostProcessor(scope);
     }
 }

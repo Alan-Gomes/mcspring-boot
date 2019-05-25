@@ -1,6 +1,7 @@
 package dev.alangomes.springspigot.context;
 
 import dev.alangomes.springspigot.util.ServerUtil;
+import lombok.Getter;
 import lombok.val;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -8,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -20,10 +23,23 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 @Scope(SCOPE_SINGLETON)
 public class Context {
 
+    @Getter
+    private static Context instance;
+
     @Autowired
     private ServerUtil serverUtil;
 
     private final Map<Long, CommandSender> senderRefs = new ConcurrentHashMap<>();
+
+    @PostConstruct
+    void init() {
+        instance = this;
+    }
+
+    @PreDestroy
+    void destroy() {
+        instance = null;
+    }
 
     /**
      * Set the current sender in the thread context.

@@ -51,7 +51,7 @@ public class DefaultCommandExecutor implements CommandExecutor {
 
     @Getter(value = AccessLevel.PACKAGE, onMethod_ = @VisibleForTesting)
     @Setter(value = AccessLevel.PACKAGE, onMethod_ = @VisibleForTesting)
-    @DynamicValue("${spigot.commands.enable_cache:true}")
+    @DynamicValue("${spigot.commands.enable_cache:false}")
     private Instance<Boolean> cacheEnabled;
 
     private CommandLine commandLineCache;
