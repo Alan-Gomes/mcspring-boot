@@ -188,7 +188,7 @@
                         <version>3.0.0</version>
                         <configuration>
                             <sourceFileExcludes>
-                                <sourceFileExclude>**/NullSender.java</sourceFileExclude>
+                                <sourceFileExclude>src/main/java/dev/alangomes/springspigot/scope/NullSender.java</sourceFileExclude>
                             </sourceFileExcludes>
                         </configuration>
                         <executions>
