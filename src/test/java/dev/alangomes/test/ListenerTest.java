@@ -4,11 +4,12 @@ import dev.alangomes.springspigot.context.Context;
 import dev.alangomes.springspigot.event.SpringEventExecutor;
 import dev.alangomes.springspigot.security.Audit;
 import dev.alangomes.test.util.SpringSpigotTestInitializer;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.bukkit.Server;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
@@ -16,12 +17,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.stereotype.Component;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -45,6 +49,9 @@ public class ListenerTest {
     @Autowired
     private Plugin plugin;
 
+    @SpyBean
+    private Context context;
+
     @Mock
     private Player player;
 
@@ -60,6 +67,13 @@ public class ListenerTest {
 
         verify(player).sendMessage("join");
         verify(player, never()).sendMessage("quit");
+    }
+
+    @Test
+    public void shouldInferSenderFromGetters() {
+        springEventExecutor.execute(testListener, new TestEvent(player));
+
+        verify(context).runWithSender(eq(player), any(Runnable.class));
     }
 
     @Component
@@ -79,6 +93,23 @@ public class ListenerTest {
             context.getPlayer().sendMessage("quit");
         }
 
+        @EventHandler
+        public void onTest(TestEvent event) {
+
+        }
+
+    }
+
+    @AllArgsConstructor
+    @Getter
+    static class TestEvent extends Event {
+
+        private CommandSender commandSender;
+
+        @Override
+        public HandlerList getHandlers() {
+            return null;
+        }
     }
 
 }

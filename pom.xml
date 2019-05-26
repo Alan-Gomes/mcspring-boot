@@ -9,7 +9,7 @@
     <groupId>dev.alangomes</groupId>
     <artifactId>spigot-spring-boot-starter</artifactId>
     <packaging>jar</packaging>
-    <version>0.15.0</version>
+    <version>0.16.0</version>
     <description>Spring support for spigot plugins</description>
     <url>https://github.com/Alan-Gomes/mcspring-boot</url>
 
@@ -120,6 +120,12 @@
             <groupId>net.milkbowl.vault</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.reactivex.rxjava2</groupId>
+            <artifactId>rxjava</artifactId>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
