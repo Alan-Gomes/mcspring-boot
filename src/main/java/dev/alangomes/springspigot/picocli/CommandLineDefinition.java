@@ -1,5 +1,6 @@
 package dev.alangomes.springspigot.picocli;
 
+import dev.alangomes.springspigot.picocli.conversion.PicocliConversorInjector;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.springframework.aop.framework.Advised;
@@ -22,7 +23,7 @@ public class CommandLineDefinition {
     private final Object instance;
     private final CommandLine.IFactory commandFactory;
 
-    private final HashMap<String, Object> subcommands = new HashMap<>();
+    private final HashMap<String, CommandLineDefinition> subcommands = new HashMap<>();
 
     CommandLineDefinition(Object instance, CommandLine.IFactory factory) {
         this.beanName = instance instanceof String ? (String) instance : null;
@@ -31,23 +32,20 @@ public class CommandLineDefinition {
     }
 
     void addSubcommand(String name, Object commandLine) {
-        subcommands.put(name, commandLine);
+        if (commandLine instanceof CommandLineDefinition) {
+            subcommands.put(name, (CommandLineDefinition) commandLine);
+        } else {
+            subcommands.put(name, new CommandLineDefinition(commandLine, commandFactory));
+        }
     }
 
     public CommandLine build(BeanFactory factory) {
         CommandLine commandLine = new CommandLine(beanName != null ? getBean(factory, beanName) : instance, commandFactory);
 
-        subcommands.forEach((key, value) -> {
-            if (value instanceof CommandLineDefinition) {
-                commandLine.addSubcommand(key, ((CommandLineDefinition) value).build(factory));
-            } else if (value instanceof String) {
-                commandLine.addSubcommand(key, getBean(factory, (String) value));
-            } else {
-                commandLine.addSubcommand(key, value);
-            }
-        });
+        subcommands.forEach((key, value) -> commandLine.addSubcommand(key, value.build(factory)));
 
         overrideHelpRenderers(commandLine);
+        overrideConverters(factory, commandLine);
         return commandLine;
     }
 
@@ -62,6 +60,11 @@ public class CommandLineDefinition {
 
     public Set<String> getCommandNames() {
         return Collections.unmodifiableSet(subcommands.keySet());
+    }
+
+    private void overrideConverters(BeanFactory beanFactory, CommandLine commandLine) {
+        PicocliConversorInjector picocliConversorInjector = beanFactory.getBean(PicocliConversorInjector.class);
+        picocliConversorInjector.injectConversor(commandLine);
     }
 
     private void overrideHelpRenderers(CommandLine commandLine) {

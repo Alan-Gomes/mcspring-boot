@@ -11,6 +11,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -23,11 +25,12 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(
-        classes = {TestApplication.class, CommandTest.TestCommand.class, CommandTest.MoneyCommand.class, CommandTest.MoneyWithdrawCommand.class},
+        classes = {TestApplication.class, CommandTest.TestCommand.class, CommandTest.MoneyCommand.class,
+                CommandTest.MoneyWithdrawCommand.class, CommandTest.ConverterCommand.class},
         initializers = SpringSpigotTestInitializer.class
 )
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
@@ -38,6 +41,9 @@ public class CommandTest {
 
     @Autowired
     private Context context;
+
+    @SpyBean
+    private ConversionService conversionService;
 
     @Mock
     private Player player;
@@ -99,6 +105,20 @@ public class CommandTest {
         assertEquals("playername", messages.get(2));
     }
 
+    @Test
+    public void shouldUseSpringConvertersOnParameters() {
+        CommandResult result = context.runWithSender(player, () -> executor.execute("convert", "123"));
+
+        verify(conversionService, atLeastOnce()).canConvert(String.class, Integer.class);
+        verify(conversionService).convert("123", Integer.class);
+        assertTrue(result.isExists());
+        assertFalse(result.isErrored());
+        List<String> messages = result.getOutput();
+        assertEquals(2, messages.size());
+        assertEquals("converted", messages.get(0));
+        assertEquals("123", messages.get(1));
+    }
+
     @Component
     @CommandLine.Command(name = "test")
     static class TestCommand implements Callable<List<String>> {
@@ -110,6 +130,20 @@ public class CommandTest {
         @Audit
         public List<String> call() {
             return Arrays.asList("test", parameter);
+        }
+    }
+
+    @Component
+    @CommandLine.Command(name = "convert")
+    static class ConverterCommand implements Callable<List<String>> {
+
+        @CommandLine.Parameters(index = "0", defaultValue = "2")
+        private Integer parameter;
+
+        @Override
+        @Audit
+        public List<String> call() {
+            return Arrays.asList("converted", parameter.toString());
         }
     }
 
