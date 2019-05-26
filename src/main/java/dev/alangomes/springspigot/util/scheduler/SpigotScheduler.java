@@ -1,8 +1,7 @@
 package dev.alangomes.springspigot.util.scheduler;
 
+import dev.alangomes.springspigot.context.Context;
 import lombok.AllArgsConstructor;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -15,16 +14,12 @@ import java.util.concurrent.ScheduledFuture;
 @AllArgsConstructor
 public class SpigotScheduler extends ThreadPoolTaskScheduler {
 
-    private final Plugin plugin;
+    private final SchedulerService scheduler;
 
-    private final BukkitScheduler scheduler;
+    private final Context context;
 
     private Runnable wrapSync(Runnable task) {
-        return new WrappedRunnable(plugin, scheduler, task);
-    }
-
-    private <T> Callable<T> wrapSync(Callable<T> task) {
-        return new WrappedCallable<>(plugin, scheduler, task);
+        return new WrappedRunnable(scheduler, task);
     }
 
     @Override
@@ -59,32 +54,27 @@ public class SpigotScheduler extends ThreadPoolTaskScheduler {
 
     @Override
     public void execute(Runnable task) {
-        super.execute(wrapSync(task));
+        super.execute(context.wrap(task));
     }
 
     @Override
     public Future<?> submit(Runnable task) {
-        return super.submit(wrapSync(task));
+        return super.submit(context.wrap(task));
     }
 
     @Override
     public <T> Future<T> submit(Callable<T> task) {
-        return super.submit(wrapSync(task));
+        return super.submit(context.wrap(task));
     }
 
     @Override
     public ListenableFuture<?> submitListenable(Runnable task) {
-        return super.submitListenable(wrapSync(task));
+        return super.submitListenable(context.wrap(task));
     }
 
     @Override
     public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
-        return super.submitListenable(wrapSync(task));
-    }
-
-    @Override
-    protected void cancelRemainingTask(Runnable task) {
-        super.cancelRemainingTask(wrapSync(task));
+        return super.submitListenable(context.wrap(task));
     }
 
 }

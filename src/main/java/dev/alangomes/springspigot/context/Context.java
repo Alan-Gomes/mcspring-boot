@@ -2,6 +2,7 @@ package dev.alangomes.springspigot.context;
 
 import dev.alangomes.springspigot.util.ServerUtil;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.val;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -148,6 +150,22 @@ public class Context {
     public <T> Supplier<T> wrap(Supplier<T> supplier) {
         val senderId = getSenderId();
         return () -> runWithSender(serverUtil.getSenderFromId(senderId), supplier);
+    }
+
+    /**
+     * Wrap a {@param callable} to keep the current context
+     *
+     * @param callable The callable to be wrapped
+     * @return The wrapped callable
+     */
+    public <T> Callable<T> wrap(Callable<T> callable) {
+        val senderId = getSenderId();
+        return () -> runWithSender(serverUtil.getSenderFromId(senderId), () -> call(callable));
+    }
+
+    @SneakyThrows
+    private <V> V call(Callable<V> callable) {
+        return callable.call();
     }
 
     /**

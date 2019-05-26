@@ -1,7 +1,9 @@
 package dev.alangomes.springspigot;
 
+import dev.alangomes.springspigot.context.Context;
 import dev.alangomes.springspigot.event.EventService;
 import dev.alangomes.springspigot.scope.SenderContextScope;
+import dev.alangomes.springspigot.util.scheduler.SchedulerService;
 import dev.alangomes.springspigot.util.scheduler.SpigotScheduler;
 import lombok.val;
 import org.bukkit.Bukkit;
@@ -48,8 +50,8 @@ class SpringSpigotAutoConfiguration {
     @Bean
     @Scope(SCOPE_SINGLETON)
     @ConditionalOnBean(SchedulingConfiguration.class)
-    public TaskScheduler taskScheduler(Plugin plugin, BukkitScheduler scheduler, @Value("${spigot.scheduler.poolSize:1}") int poolSize) {
-        val taskScheduler = new SpigotScheduler(plugin, scheduler);
+    public TaskScheduler taskScheduler(Context context, SchedulerService scheduler, @Value("${spigot.scheduler.poolSize:1}") int poolSize) {
+        val taskScheduler = new SpigotScheduler(scheduler, context);
         taskScheduler.setPoolSize(poolSize);
         taskScheduler.initialize();
         return taskScheduler;
