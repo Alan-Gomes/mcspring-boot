@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static jdk.nashorn.internal.runtime.JSType.toBoolean;
+import static org.apache.commons.lang3.BooleanUtils.toBoolean;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
 
 @Slf4j
