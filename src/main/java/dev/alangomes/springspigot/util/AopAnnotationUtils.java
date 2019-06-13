@@ -1,22 +1,35 @@
 package dev.alangomes.springspigot.util;
 
 import lombok.val;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.util.ClassUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.springframework.core.annotation.AnnotatedElementUtils.findAllMergedAnnotations;
+import static org.springframework.util.ClassUtils.getUserClass;
 
 public class AopAnnotationUtils {
 
-    private AopAnnotationUtils() {}
+    private static final Map<Class<?>, Map<Method, List<Annotation>>> annotationCache = new ConcurrentHashMap<>();
 
-    public static <T extends Annotation> Stream<T> getAppliableAnnotations(Method method, Class<T> annotation) {
-        val declaringClass = ClassUtils.getUserClass(method.getDeclaringClass());
-        val methodAnnotations = AnnotationUtils.getRepeatableAnnotations(method, annotation);
-        val classAnnotations = AnnotationUtils.getRepeatableAnnotations(declaringClass, annotation);
-        return Stream.concat(classAnnotations.stream(), methodAnnotations.stream());
+    private AopAnnotationUtils() {
+    }
+
+    public static <T extends Annotation> List<T> getAppliableAnnotations(Method method, Class<T> annotation) {
+        val methodCache = annotationCache.computeIfAbsent(annotation, a -> new ConcurrentHashMap<>());
+        val annotations = methodCache.computeIfAbsent(method, m -> {
+            val declaringClass = getUserClass(method.getDeclaringClass());
+            val methodAnnotations = findAllMergedAnnotations(method, annotation);
+            val classAnnotations = findAllMergedAnnotations(declaringClass, annotation);
+            return Collections.unmodifiableList(Stream.concat(classAnnotations.stream(), methodAnnotations.stream()).collect(Collectors.toList()));
+        });
+        return (List<T>) annotations;
     }
 
 }

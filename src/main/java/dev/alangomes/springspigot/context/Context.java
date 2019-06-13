@@ -31,7 +31,7 @@ public class Context {
     @Autowired
     private ServerUtil serverUtil;
 
-    private final Map<Long, CommandSender> senderRefs = new ConcurrentHashMap<>();
+    private final Map<Long, String> senderRefs = new ConcurrentHashMap<>();
 
     @PostConstruct
     void init() {
@@ -54,7 +54,7 @@ public class Context {
             senderRefs.remove(threadId);
             return;
         }
-        senderRefs.put(threadId, sender);
+        senderRefs.put(threadId, serverUtil.getSenderId(sender));
     }
 
     /**
@@ -73,7 +73,8 @@ public class Context {
      * @return The current sender of the context.
      */
     public CommandSender getSender() {
-        return senderRefs.get(Thread.currentThread().getId());
+        val senderRef = senderRefs.get(Thread.currentThread().getId());
+        return serverUtil.getSenderFromId(senderRef);
     }
 
     /**

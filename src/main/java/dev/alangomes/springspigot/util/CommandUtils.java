@@ -10,8 +10,9 @@ import picocli.CommandLine;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Model.PositionalParamSpec;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -53,20 +54,21 @@ public class CommandUtils {
     }
 
     private static Stream<String> getSuggestedValues(PositionalParamSpec paramSpec) {
-        Stream<String> candidates = paramSpec.completionCandidates() != null ?
-                StreamSupport.stream(Spliterators.spliteratorUnknownSize(paramSpec.completionCandidates().iterator(),
-                        0), false) : Stream.empty();
-        Stream<String> suggested = getSuggestedValues(paramSpec.type()).stream();
-        return Stream.concat(candidates, suggested);
+        Iterable<String> completionCandidates = paramSpec.completionCandidates();
+        if (completionCandidates != null) {
+            return StreamSupport.stream(Spliterators.spliteratorUnknownSize(completionCandidates.iterator(), 0), false);
+        } else {
+            return getSuggestedValues(paramSpec.type());
+        }
     }
 
-    private static List<String> getSuggestedValues(Class<?> type) {
+    private static Stream<String> getSuggestedValues(Class<?> type) {
         if (CommandSender.class.isAssignableFrom(type)) {
-            return Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
+            return Bukkit.getOnlinePlayers().stream().map(Player::getName);
         } else if (World.class.isAssignableFrom(type)) {
-            return Bukkit.getWorlds().stream().map(World::getName).collect(Collectors.toList());
+            return Bukkit.getWorlds().stream().map(World::getName);
         }
-        return Collections.emptyList();
+        return Stream.empty();
     }
 
     private static Stream<String> getPossibleSubcommands(CommandSpec spec, String[] args, int index) {

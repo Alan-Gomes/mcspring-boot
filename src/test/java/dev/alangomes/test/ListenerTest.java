@@ -14,6 +14,7 @@ import org.bukkit.event.*;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -26,8 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(
@@ -54,6 +54,12 @@ public class ListenerTest {
 
     @Mock
     private Player player;
+
+    @Before
+    public void setup() {
+        when(player.getName()).thenReturn("player");
+        when(server.getPlayer("player")).thenReturn(player);
+    }
 
     @Test
     public void shouldRegisterAllEventsInTheListener() {

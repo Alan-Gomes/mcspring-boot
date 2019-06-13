@@ -8,6 +8,7 @@ import dev.alangomes.springspigot.scope.SenderScoped;
 import dev.alangomes.springspigot.security.Audit;
 import dev.alangomes.springspigot.security.Authorize;
 import dev.alangomes.test.util.SpringSpigotTestInitializer;
+import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,6 +50,9 @@ public class CommandTest {
     @SpyBean
     private ConversionService conversionService;
 
+    @Autowired
+    private Server server;
+
     @Mock
     private Player player, player2;
 
@@ -56,6 +60,8 @@ public class CommandTest {
     public void setup() {
         when(player.getName()).thenReturn("player1");
         when(player2.getName()).thenReturn("player2");
+        when(server.getPlayer("player1")).thenReturn(player);
+        when(server.getPlayer("player2")).thenReturn(player2);
     }
 
     @Test
@@ -102,8 +108,6 @@ public class CommandTest {
 
     @Test
     public void shouldExecuteIdependentSubcommandCorrectly() {
-        when(player.getName()).thenReturn("playername");
-
         CommandResult result = context.runWithSender(player, () -> executor.execute("money", "withdraw", "test"));
 
         assertTrue(result.isExists());
@@ -112,7 +116,7 @@ public class CommandTest {
         assertEquals(3, messages.size());
         assertEquals("withdraw", messages.get(0));
         assertEquals("test", messages.get(1));
-        assertEquals("playername", messages.get(2));
+        assertEquals("player1", messages.get(2));
     }
 
     @Test

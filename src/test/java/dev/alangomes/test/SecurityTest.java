@@ -4,10 +4,10 @@ import dev.alangomes.springspigot.context.Context;
 import dev.alangomes.springspigot.context.SessionService;
 import dev.alangomes.springspigot.exception.PermissionDeniedException;
 import dev.alangomes.springspigot.exception.PlayerNotFoundException;
-import dev.alangomes.springspigot.security.Audit;
-import dev.alangomes.springspigot.security.Authorize;
-import dev.alangomes.springspigot.security.GuardService;
+import dev.alangomes.springspigot.security.*;
 import dev.alangomes.test.util.SpringSpigotTestInitializer;
+import org.bukkit.Server;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -41,12 +42,16 @@ public class SecurityTest {
     @Autowired
     private SessionService sessionService;
 
+    @Autowired
+    private Server server;
+
     @Mock
     private Player player;
 
     @Before
     public void setup() {
         when(player.getName()).thenReturn("test_player");
+        when(server.getPlayer("test_player")).thenReturn(player);
     }
 
     @Test(expected = PlayerNotFoundException.class)
@@ -90,7 +95,7 @@ public class SecurityTest {
     public void shouldCallGuardMethod() {
         when(player.hasPermission("test.admin")).thenReturn(false);
 
-        context.runWithSender(player, () -> testService.testGuard());
+        context.runWithSender(player, testService::testGuard);
     }
 
     @Test(expected = PermissionDeniedException.class)
@@ -98,7 +103,7 @@ public class SecurityTest {
         when(player.hasPermission("server.shutdown")).thenReturn(false);
 
         try {
-            context.runWithSender(player, () -> testService.testMessage());
+            context.runWithSender(player, testService::testMessage);
         } catch (PermissionDeniedException exception) {
             assertEquals("You cannot shutdown the server!", exception.getMessage());
             throw exception;
@@ -113,10 +118,23 @@ public class SecurityTest {
         });
     }
 
+    @Test(expected = PermissionDeniedException.class)
+    public void shouldThrowExceptionWithCustomMessageIfSenderIsNotPlayer() {
+        ConsoleCommandSender sender = mock(ConsoleCommandSender.class);
+        when(server.getConsoleSender()).thenReturn(sender);
+
+        try {
+            context.runWithSender(sender, testService::testPlayer);
+        } catch (PermissionDeniedException exception) {
+            assertEquals("Only players can run this method!", exception.getMessage());
+            throw exception;
+        }
+    }
+
     @Service
     static class TestService {
         @Audit(senderOnly = false)
-        @Authorize("hasPermission('server.kill')")
+        @HasPermission("server.kill")
         public int sum(int num1, int num2) {
             return num1 + num2;
         }
@@ -134,6 +152,11 @@ public class SecurityTest {
 
         @Authorize("#guard.isAdmin()")
         public void testGuard() {
+
+        }
+
+        @PlayerOnly(message = "Only players can run this method!")
+        public void testPlayer() {
 
         }
 

@@ -8,6 +8,7 @@ import dev.alangomes.test.util.SpringSpigotTestInitializer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.EventExecutor;
@@ -45,6 +46,9 @@ public class ScopeTest {
     @Autowired
     private SenderContextScope senderContextScope;
 
+    @Autowired
+    private Server server;
+
     @Mock
     private Player player1, player2;
 
@@ -55,6 +59,8 @@ public class ScopeTest {
     public void setup() {
         when(player1.getName()).thenReturn("test_player");
         when(player2.getName()).thenReturn("test_player2");
+        when(server.getPlayer("test_player")).thenReturn(player1);
+        when(server.getPlayer("test_player2")).thenReturn(player2);
         eventExecutor = springEventExecutor.create(SenderContextScope.class.getDeclaredMethod("onQuit", PlayerQuitEvent.class));
     }
 

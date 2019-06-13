@@ -56,6 +56,8 @@ public class SessionTest {
         when(server.getOnlineMode()).thenReturn(false);
         when(player1.getName()).thenReturn("player1");
         when(player2.getName()).thenReturn("player2");
+        when(server.getPlayer("player1")).thenReturn(player1);
+        when(server.getPlayer("player2")).thenReturn(player2);
         eventExecutor = springEventExecutor.create(DefaultSessionService.class.getDeclaredMethod("onQuit", PlayerQuitEvent.class));
     }
 

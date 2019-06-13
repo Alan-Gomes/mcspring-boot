@@ -74,6 +74,7 @@ class SecurityAspect {
         AopAnnotationUtils.getAppliableAnnotations(method, Authorize.class).forEach(authorize -> {
             val expressionSource = authorize.value();
             val expression = expressionCache.computeIfAbsent(expressionSource, parser::parseExpression);
+            senderContext.setVariable("params", authorize.params());
             if (!toBoolean(expression.getValue(senderContext, Boolean.class))) {
                 val message = StringUtils.trimToNull(ChatColor.translateAlternateColorCodes('&', authorize.message()));
                 throw new PermissionDeniedException(expressionSource, message);
@@ -93,7 +94,7 @@ class SecurityAspect {
         val signature = ClassUtils.getUserClass(method.getDeclaringClass()).getName() + "." + method.getName();
         val arguments = Arrays.stream(joinPoint.getArgs()).map(String::valueOf).collect(Collectors.joining(", "));
 
-        AopAnnotationUtils.getAppliableAnnotations(method, Audit.class)
+        AopAnnotationUtils.getAppliableAnnotations(method, Audit.class).stream()
                 .filter(audit -> sender != null || !audit.senderOnly())
                 .limit(1)
                 .forEach(audit -> {

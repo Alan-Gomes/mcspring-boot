@@ -3,12 +3,17 @@ package dev.alangomes.springspigot.util;
 import lombok.val;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+/**
+ * Utilities to get sender id by the object and vice-versa, since storing the instance is not a good practice
+ * (can cause memory issues if the sender quits and the object keep alive for too long)
+ */
 @Component
 public class ServerUtil {
 
@@ -28,7 +33,7 @@ public class ServerUtil {
         if (sender == null) {
             return null;
         }
-        if (!(sender instanceof Player)) {
+        if (sender instanceof ConsoleCommandSender) {
             return CONSOLE_SENDER_ID;
         }
         val player = (Player) sender;

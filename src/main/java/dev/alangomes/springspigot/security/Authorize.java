@@ -31,4 +31,10 @@ public @interface Authorize {
      */
     String message() default "";
 
+    /**
+     * Additional parameters that will be set on the expression as {@code #params}.
+     * @see dev.alangomes.springspigot.security.HasPermission
+     */
+    String[] params() default {};
+
 }

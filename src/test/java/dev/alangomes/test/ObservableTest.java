@@ -15,6 +15,7 @@ import org.bukkit.event.EventException;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -29,6 +30,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(
@@ -55,6 +57,12 @@ public class ObservableTest {
 
     @ObserveEvent
     private Observable<TestEvent> testEventObservable;
+
+    @Before
+    public void setup() {
+        when(player.getName()).thenReturn("player");
+        when(server.getPlayer("player")).thenReturn(player);
+    }
 
     @Test
     public void shouldRegisterEventsForTheObservable() {
