@@ -13,8 +13,13 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class EventUtil {
+
+    private static final Map<Class<? extends Event>, Method> senderGetters = new HashMap<>();
 
     private EventUtil() {
     }
@@ -32,13 +37,22 @@ public class EventUtil {
     }
 
     private static CommandSender getInferredSender(Event event) {
-        return Arrays.stream(ReflectionUtils.getAllDeclaredMethods(event.getClass()))
+        return getSenderMethod(event.getClass())
+                .map(method -> (CommandSender) getValue(event, method))
+                .orElse(null);
+    }
+
+    private static Optional<Method> getSenderMethod(Class<? extends Event> eventClass) {
+        return Optional.ofNullable(senderGetters.computeIfAbsent(eventClass, EventUtil::findSenderMethod));
+    }
+
+    private static Method findSenderMethod(Class<? extends Event> c) {
+        return Arrays.stream(ReflectionUtils.getAllDeclaredMethods(c))
                 .filter(method -> method.getName().startsWith("get"))
                 .filter(method -> method.getParameters().length == 0)
                 .filter(method -> CommandSender.class.isAssignableFrom(method.getReturnType()))
                 .filter(method -> Modifier.isPublic(method.getModifiers()))
                 .findFirst()
-                .map(method -> (CommandSender) getValue(event, method))
                 .orElse(null);
     }
 

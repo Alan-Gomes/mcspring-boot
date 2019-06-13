@@ -6,6 +6,7 @@ import dev.alangomes.springspigot.security.Audit;
 import dev.alangomes.test.util.SpringSpigotTestInitializer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -24,8 +25,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -57,21 +57,29 @@ public class ListenerTest {
 
     @Test
     public void shouldRegisterAllEventsInTheListener() {
-        verify(server.getPluginManager()).registerEvent(PlayerJoinEvent.class, testListener, EventPriority.NORMAL, springEventExecutor, plugin, true);
-        verify(server.getPluginManager()).registerEvent(PlayerQuitEvent.class, testListener, EventPriority.HIGHEST, springEventExecutor, plugin, false);
+        verify(server.getPluginManager()).registerEvent(eq(PlayerJoinEvent.class), eq(testListener),
+                eq(EventPriority.NORMAL), notNull(), eq(plugin), eq(true));
+        verify(server.getPluginManager()).registerEvent(eq(PlayerQuitEvent.class), eq(testListener),
+                eq(EventPriority.HIGHEST), notNull(), eq(plugin), eq(false));
     }
 
     @Test
+    @SneakyThrows
     public void shouldExecuteEventOnListener() {
-        springEventExecutor.execute(testListener, new PlayerJoinEvent(player, ""));
+        springEventExecutor
+                .create(TestListener.class.getDeclaredMethod("onJoin", PlayerJoinEvent.class))
+                .execute(testListener, new PlayerJoinEvent(player, ""));
 
         verify(player).sendMessage("join");
         verify(player, never()).sendMessage("quit");
     }
 
     @Test
+    @SneakyThrows
     public void shouldInferSenderFromGetters() {
-        springEventExecutor.execute(testListener, new TestEvent(player));
+        springEventExecutor
+                .create(TestListener.class.getDeclaredMethod("onTest", TestEvent.class))
+                .execute(testListener, new TestEvent(player));
 
         verify(context).runWithSender(eq(player), any(Runnable.class));
     }

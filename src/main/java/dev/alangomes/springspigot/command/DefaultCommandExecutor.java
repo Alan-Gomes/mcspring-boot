@@ -12,6 +12,7 @@ import lombok.val;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandException;
+import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
@@ -34,11 +35,15 @@ public class DefaultCommandExecutor implements CommandExecutor {
     @Autowired
     private ApplicationContext applicationContext;
 
+    @Autowired(required = false)
+    private AbstractAutoProxyCreator proxyCreator;
+
     @Autowired
     private CommandLineDefinition cli;
 
     @Setter(value = AccessLevel.PACKAGE, onMethod_ = @VisibleForTesting)
-    @DynamicValue("${spigot.messages.command_error:&cAn internal error occurred while attemping to perform this command}")
+    @DynamicValue("${spigot.messages.command_error:&cAn internal error occurred while attemping to perform this " +
+            "command}")
     private Instance<String> commandErrorMessage;
 
     @Setter(value = AccessLevel.PACKAGE, onMethod_ = @VisibleForTesting)
@@ -72,7 +77,8 @@ public class DefaultCommandExecutor implements CommandExecutor {
                 return CommandResult.unknown();
             }
             val commandLine = commands.get(commands.size() - 1);
-            val command = commandLine.getCommand();
+            val command = proxyCreator != null ? proxyCreator.getEarlyBeanReference(commandLine.getCommand(), null) :
+                    commandLine.getCommand();
 
             if (command instanceof Runnable) {
                 ((Runnable) command).run();
@@ -112,4 +118,6 @@ public class DefaultCommandExecutor implements CommandExecutor {
         }
         return Collections.emptyList();
     }
+
+
 }

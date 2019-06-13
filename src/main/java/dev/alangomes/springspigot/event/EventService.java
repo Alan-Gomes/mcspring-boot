@@ -6,16 +6,17 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 @Service
 public class EventService {
-
-    @Autowired
-    private EventScanner eventScanner;
 
     @Autowired
     private SpringEventExecutor eventExecutor;
@@ -27,13 +28,21 @@ public class EventService {
     private Plugin plugin;
 
     public void registerEvents(Listener listener) {
-        eventScanner.getListenerMethods(listener).forEach(method -> registerEvents(listener, method));
+        getListenerMethods(listener).forEach(method -> registerEvents(listener, method));
     }
 
     private void registerEvents(Listener listener, Method method) {
         val handler = method.getAnnotation(EventHandler.class);
         val eventType = (Class<? extends Event>) method.getParameters()[0].getType();
-        server.getPluginManager().registerEvent(eventType, listener, handler.priority(), eventExecutor, plugin, handler.ignoreCancelled());
+        server.getPluginManager().registerEvent(eventType, listener, handler.priority(), eventExecutor.create(method), plugin, handler.ignoreCancelled());
+    }
+
+    private Stream<Method> getListenerMethods(Listener listener) {
+        val target = AopUtils.getTargetClass(listener);
+        return Arrays.stream(ReflectionUtils.getAllDeclaredMethods(target))
+                .filter(method -> method.isAnnotationPresent(EventHandler.class))
+                .filter(method -> method.getParameters().length == 1)
+                .filter(method -> Event.class.isAssignableFrom(method.getParameters()[0].getType()));
     }
 
 }

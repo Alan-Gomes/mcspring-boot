@@ -1,13 +1,16 @@
 package dev.alangomes.test;
 
 import dev.alangomes.springspigot.context.Context;
+import dev.alangomes.springspigot.context.DefaultSessionService;
 import dev.alangomes.springspigot.context.SessionService;
 import dev.alangomes.springspigot.event.SpringEventExecutor;
 import dev.alangomes.test.util.SpringSpigotTestInitializer;
+import lombok.SneakyThrows;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.EventExecutor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +40,7 @@ public class SessionTest {
     private Context context;
 
     @Autowired
-    private SpringEventExecutor eventExecutor;
+    private SpringEventExecutor springEventExecutor;
 
     @Autowired
     private Server server;
@@ -45,11 +48,15 @@ public class SessionTest {
     @Mock
     private Player player1, player2;
 
+    private EventExecutor eventExecutor;
+
     @Before
+    @SneakyThrows
     public void setup() {
         when(server.getOnlineMode()).thenReturn(false);
         when(player1.getName()).thenReturn("player1");
         when(player2.getName()).thenReturn("player2");
+        eventExecutor = springEventExecutor.create(DefaultSessionService.class.getDeclaredMethod("onQuit", PlayerQuitEvent.class));
     }
 
     @Test
@@ -64,6 +71,7 @@ public class SessionTest {
     }
 
     @Test
+    @SneakyThrows
     public void shouldClearPlayerSessionOnQuit() {
         context.runWithSender(player1, () -> sessionService.current().put("key.test", "value for player 1"));
         context.runWithSender(player2, () -> sessionService.current().put("key.test", "value for player 2"));

@@ -134,14 +134,6 @@ class PicocliConfiguration {
             if (StringUtils.isBlank(commandName)) {
                 continue;
             }
-            Class<?> beanType = applicationContext.getType(node.getBeanName());
-            if (ClassUtils.isCglibProxyClass(beanType)) {
-                String className = ClassUtils.getQualifiedName(ClassUtils.getUserClass(beanType));
-                log.warn("The command class {} is a CGLIB proxy, which is not supported by the Picocli API.", className);
-                log.warn("This is usually caused by the use of @Authorize, @Audit or @Synchronize annotations " +
-                        "in methods inside command classes, these methods should be moved to another bean.");
-                log.warn("These annotations will have no effect.");
-            }
             if (parents.containsKey(node.getParent())) {
                 current = parents.get(node.getParent());
             } else if (node.getParent() == null) {

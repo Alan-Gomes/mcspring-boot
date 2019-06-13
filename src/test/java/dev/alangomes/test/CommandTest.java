@@ -4,9 +4,12 @@ import dev.alangomes.springspigot.command.CommandExecutor;
 import dev.alangomes.springspigot.command.CommandResult;
 import dev.alangomes.springspigot.command.Subcommand;
 import dev.alangomes.springspigot.context.Context;
+import dev.alangomes.springspigot.scope.SenderScoped;
 import dev.alangomes.springspigot.security.Audit;
+import dev.alangomes.springspigot.security.Authorize;
 import dev.alangomes.test.util.SpringSpigotTestInitializer;
 import org.bukkit.entity.Player;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -30,7 +33,8 @@ import static org.mockito.Mockito.*;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(
         classes = {TestApplication.class, CommandTest.TestCommand.class, CommandTest.MoneyCommand.class,
-                CommandTest.MoneyWithdrawCommand.class, CommandTest.ConverterCommand.class},
+                CommandTest.MoneyWithdrawCommand.class, CommandTest.ConverterCommand.class,
+                CommandTest.CounterCommand.class},
         initializers = SpringSpigotTestInitializer.class
 )
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
@@ -46,7 +50,13 @@ public class CommandTest {
     private ConversionService conversionService;
 
     @Mock
-    private Player player;
+    private Player player, player2;
+
+    @Before
+    public void setup() {
+        when(player.getName()).thenReturn("player1");
+        when(player2.getName()).thenReturn("player2");
+    }
 
     @Test
     public void shouldExecuteCommandCorrectly() {
@@ -117,6 +127,39 @@ public class CommandTest {
         assertEquals(2, messages.size());
         assertEquals("converted", messages.get(0));
         assertEquals("123", messages.get(1));
+    }
+
+    @Test
+    public void shouldWorkWithSenderScope() {
+        context.runWithSender(player, () -> executor.execute("add", "1"));
+        CommandResult result2 = context.runWithSender(player2, () -> executor.execute("add", "3"));
+        CommandResult result1 = context.runWithSender(player, () -> executor.execute("add", "1"));
+
+        List<String> messages1 = result1.getOutput();
+        assertEquals(1, messages1.size());
+        assertEquals("2", messages1.get(0));
+
+        List<String> messages2 = result2.getOutput();
+        assertEquals(1, messages2.size());
+        assertEquals("3", messages2.get(0));
+    }
+
+    @Component
+    @SenderScoped
+    @CommandLine.Command(name = "add")
+    static class CounterCommand implements Callable<String> {
+
+        @CommandLine.Parameters(index = "0")
+        private Integer value;
+
+        private Integer counter = 0;
+
+        @Override
+        @Authorize("!isOnline()")
+        public String call() {
+            counter += value;
+            return String.valueOf(counter);
+        }
     }
 
     @Component
