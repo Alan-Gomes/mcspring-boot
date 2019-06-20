@@ -40,12 +40,17 @@ public class CommandLineDefinition {
     }
 
     public CommandLine build(BeanFactory factory) {
-        CommandLine commandLine = new CommandLine(beanName != null ? getBean(factory, beanName) : instance, commandFactory);
-
-        subcommands.forEach((key, value) -> commandLine.addSubcommand(key, value.build(factory)));
+        CommandLine commandLine = doBuild(factory);
 
         overrideHelpRenderers(commandLine);
         overrideConverters(factory, commandLine);
+        return commandLine;
+    }
+
+    private CommandLine doBuild(BeanFactory factory) {
+        CommandLine commandLine = new CommandLine(beanName != null ? getBean(factory, beanName) : instance, commandFactory);
+
+        subcommands.forEach((key, value) -> commandLine.addSubcommand(key, value.doBuild(factory)));
         return commandLine;
     }
 
