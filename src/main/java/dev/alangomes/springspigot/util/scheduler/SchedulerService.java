@@ -37,6 +37,38 @@ public interface SchedulerService {
      * @return Task id number (-1 if scheduling failed)
      */
     int scheduleSyncRepeatingTask(Runnable task, long delay, long period);
+    /**
+     * Schedules a once off task to occur after a delay.
+     * <p>
+     * This task will not be executed by the main server thread.
+     *
+     * @param task  Task to be executed
+     * @param delay Delay in server ticks before executing task
+     * @return Task id number (-1 if scheduling failed)
+     */
+    int scheduleAsyncDelayedTask(Runnable task, long delay);
+
+    /**
+     * Schedules a once off task to occur as soon as possible.
+     * <p>
+     * This task will not be executed by the main server thread.
+     *
+     * @param task Task to be executed
+     * @return Task id number (-1 if scheduling failed)
+     */
+    int scheduleAsyncDelayedTask(Runnable task);
+
+    /**
+     * Schedules a repeating task.
+     * <p>
+     * This task will not be executed by the main server thread.
+     *
+     * @param task   Task to be executed
+     * @param delay  Delay in server ticks before executing first repeat
+     * @param period Period in server ticks of the task
+     * @return Task id number (-1 if scheduling failed)
+     */
+    int scheduleAsyncRepeatingTask(Runnable task, long delay, long period);
 
     /**
      * Removes task from scheduler.
