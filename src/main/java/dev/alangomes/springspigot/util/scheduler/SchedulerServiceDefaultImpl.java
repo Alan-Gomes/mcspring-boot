@@ -38,6 +38,21 @@ class SchedulerServiceDefaultImpl implements SchedulerService, Scheduler {
     }
 
     @Override
+    public int scheduleAsyncDelayedTask(Runnable task, long delay) {
+        return scheduler.runTaskLaterAsynchronously(plugin, context.wrap(task), delay).getTaskId();
+    }
+
+    @Override
+    public int scheduleAsyncDelayedTask(Runnable task) {
+        return scheduler.runTaskAsynchronously(plugin, context.wrap(task)).getTaskId();
+    }
+
+    @Override
+    public int scheduleAsyncRepeatingTask(Runnable task, long delay, long period) {
+        return scheduler.runTaskTimerAsynchronously(plugin, context.wrap(task), delay, period).getTaskId();
+    }
+
+    @Override
     public void cancelTask(int taskId) {
         scheduler.cancelTask(taskId);
     }
