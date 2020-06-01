@@ -7,6 +7,7 @@ import dev.alangomes.springspigot.picocli.CommandLineDefinition;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang.StringUtils;
@@ -90,7 +91,13 @@ public class DefaultCommandExecutor implements CommandExecutor {
         } catch (CommandLine.InitializationException ex) {
             log.error("Unexpected exception during command initialization", ex);
             return CommandResult.unknown();
-        } catch (CommandLine.UnmatchedArgumentException ignored) {
+        } catch (CommandLine.UnmatchedArgumentException ex) {
+            val commandObject = ex.getCommandLine().getCommandSpec().userObject();
+            if (getBaseCommandClass().isInstance(commandObject)){
+                return CommandResult.unknown();
+            }
+            val message = String.format(parameterErrorMessage.get(), String.join(", ", ex.getUnmatched()));
+            return new CommandResult(ChatColor.translateAlternateColorCodes('&', message), true);
         } catch (CommandLine.MissingParameterException ex) {
             val message = String.format(missingParameterErrorMessage.get(), ex.getMissing().get(0).paramLabel());
             return new CommandResult(ChatColor.translateAlternateColorCodes('&', message), true);
@@ -119,5 +126,9 @@ public class DefaultCommandExecutor implements CommandExecutor {
         return Collections.emptyList();
     }
 
+    @SneakyThrows
+    private Class<?> getBaseCommandClass() {
+        return Class.forName("dev.alangomes.springspigot.picocli.BaseCommand");
+    }
 
 }
