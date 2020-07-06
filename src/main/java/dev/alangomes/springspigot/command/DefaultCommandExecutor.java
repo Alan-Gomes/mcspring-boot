@@ -93,7 +93,7 @@ public class DefaultCommandExecutor implements CommandExecutor {
             return CommandResult.unknown();
         } catch (CommandLine.UnmatchedArgumentException ex) {
             val commandObject = ex.getCommandLine().getCommandSpec().userObject();
-            if (getBaseCommandClass().isInstance(commandObject)){
+            if (commandObject == null || getBaseCommandClass().isInstance(commandObject)){
                 return CommandResult.unknown();
             }
             val message = String.format(parameterErrorMessage.get(), String.join(", ", ex.getUnmatched()));
@@ -110,7 +110,6 @@ public class DefaultCommandExecutor implements CommandExecutor {
             log.error("Unexpected exception while running /" + StringUtils.join(commandParts, " "), ex);
             return new CommandResult(ChatColor.translateAlternateColorCodes('&', commandErrorMessage.get()), true);
         }
-        return CommandResult.unknown();
     }
 
     private List<String> buildOutput(Object result) {

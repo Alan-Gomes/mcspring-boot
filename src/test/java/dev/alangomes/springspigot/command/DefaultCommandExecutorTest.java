@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationContext;
 import picocli.CommandLine;
+import picocli.CommandLine.Model.CommandSpec;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,6 +58,8 @@ public class DefaultCommandExecutorTest {
         when(commandLine.parse(any())).thenReturn(Collections.singletonList(command));
 
         when(command.getCommand()).thenReturn(commandRunnable);
+        CommandSpec commandSpec = mock(CommandSpec.class);
+        when(commandLine.getCommandSpec()).thenReturn(commandSpec);
 
         when(argument.paramLabel()).thenReturn("<parameter>");
 
