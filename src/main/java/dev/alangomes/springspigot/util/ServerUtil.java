@@ -1,11 +1,10 @@
 package dev.alangomes.springspigot.util;
 
 import lombok.val;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,11 +33,8 @@ public class ServerUtil {
         if (sender == null) {
             return null;
         }
-        if (sender instanceof ConsoleCommandSender) {
-            return CONSOLE_SENDER_ID;
-        }
         if (!(sender instanceof OfflinePlayer)) {
-            return null;
+            return CONSOLE_SENDER_ID;
         }
         val player = (OfflinePlayer) sender;
         return server.getOnlineMode() ? player.getUniqueId().toString() : StringUtils.lowerCase(player.getName());

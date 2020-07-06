@@ -75,7 +75,7 @@ class CommandService {
             log.debug("Succesfully registered {} commands", commandSpecs.size());
             registered = true;
         } catch (Throwable t) {
-            log.debug("Failed to register commands natively, falling back to event listeners", t);
+            log.warn("Failed to register commands natively, falling back to event listeners", t);
         }
     }
 
@@ -85,7 +85,7 @@ class CommandService {
             List<CommandSpec> commandSpecs = getCommands();
             commandSpecs.forEach(this::unregisterCommand);
         } catch (Throwable t) {
-            log.debug("Failed to unregister commands natively", t);
+            log.warn("Failed to unregister commands natively", t);
         }
     }
 
