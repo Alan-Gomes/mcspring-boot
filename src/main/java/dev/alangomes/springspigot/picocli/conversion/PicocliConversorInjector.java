@@ -26,7 +26,7 @@ public class PicocliConversorInjector {
 
         val registryField = interpreterClass.getDeclaredField("converterRegistry");
         registryField.setAccessible(true);
-        removeFinal(registryField);
+        //removeFinal(registryField);
 
         val originalRegistry = registryField.get(interpreter);
         if (!(originalRegistry instanceof ConverterRegistryDecorator)) {
