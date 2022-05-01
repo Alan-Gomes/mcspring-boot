@@ -26,7 +26,6 @@ public class PicocliConversorInjector {
 
         val registryField = interpreterClass.getDeclaredField("converterRegistry");
         registryField.setAccessible(true);
-        removeFinal(registryField);
 
         val originalRegistry = registryField.get(interpreter);
         if (!(originalRegistry instanceof ConverterRegistryDecorator)) {
@@ -34,13 +33,6 @@ public class PicocliConversorInjector {
                     CommandLine.ITypeConverter<?>>) originalRegistry, conversionService));
         }
         commandLine.getSubcommands().values().forEach(this::injectConversor);
-    }
-
-    @SneakyThrows
-    private void removeFinal(Field field) {
-        Field modifiersField = Field.class.getDeclaredField("modifiers");
-        modifiersField.setAccessible(true);
-        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
     }
 
 }
