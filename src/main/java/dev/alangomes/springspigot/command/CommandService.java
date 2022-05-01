@@ -94,7 +94,6 @@ class CommandService {
         val commandMapField = bukkitClass.getDeclaredField("commandMap");
         commandMapField.setAccessible(true);
         val commandMap = (SimpleCommandMap) commandMapField.get(plugin.getServer());
-
         commandMap.register(plugin.getName().toLowerCase(), new WrappedCommand(commandSpec, context, commandExecutor));
     }
 
