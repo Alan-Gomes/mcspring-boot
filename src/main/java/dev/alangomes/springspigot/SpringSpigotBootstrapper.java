@@ -40,6 +40,13 @@ public final class SpringSpigotBootstrapper {
                 val props = new Properties();
                 try {
                     props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("application.properties"));
+                    props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("application.yml"));
+                    props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("application-local.properties"));
+                    props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("application-local.yml"));
+                    props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("application-prod.properties"));
+                    props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("application-prod.yml"));
+                    props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("application-test.properties"));
+                    props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("application-test.yml"));
                 } catch (Exception ignored) {
                 }
 
